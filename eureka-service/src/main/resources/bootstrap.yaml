@@ -1,7 +1,20 @@
+server:
+  port: 8761  # Puerto estándar para Eureka
+
 spring:
   application:
     name: eureka-service
-  cloud:
-    config:
-      enabled: true
-      uri: http://localhost:8081
+  config:
+    import: optional:configserver:http://localhost:8081  # Forma recomendada en Spring Boot 2.4+
+
+eureka:
+  dashboard:
+    enabled: true
+    path: /
+  instance:
+    hostname: localhost
+  client:
+    registerWithEureka: false  # Este servicio no debe registrarse a sí mismo
+    fetchRegistry: false       # No necesita obtener el registro de otros servicios
+    serviceUrl:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/

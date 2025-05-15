@@ -8,5 +8,7 @@ spring:
           default-label: main
           uri: https://github.com/DevYanezeo/T02-KartingRM
           search-paths: config-data
+          username: Devyanezeo
+          password: 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
   application:
     name: config-service

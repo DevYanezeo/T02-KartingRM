@@ -27,6 +27,16 @@ public class PricingController {
         return ResponseEntity.ok(dtos);
     }
 
+    @RestController
+    @RequestMapping("/test")
+    public class TestController {
+        @GetMapping
+        public String hello() {
+            return "Servicio operativo";
+        }
+    }
+
+
     @GetMapping("/search")
     public ResponseEntity<Pricing> getPricingByLapsAndDuration(
             @RequestParam int laps,

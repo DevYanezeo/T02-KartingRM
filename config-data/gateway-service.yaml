@@ -17,3 +17,9 @@ spring:
         locator:
           enabled: true
       routes:
+        - id: pricing-service
+          uri: lb://PRICING-SERVICE  # "lb" = load balancing
+          predicates:
+            - Path=/api/pricing/**
+          filters:
+            - StripPrefix=1  # Elimina "/api/pricing" al redirigir

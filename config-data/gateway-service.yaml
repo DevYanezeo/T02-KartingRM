@@ -22,14 +22,14 @@ spring:
             allowedHeaders: '*'
       routes:
         - id: pricing-service
-          uri: lb://pricing-service:8091
+          uri: lb://pricing-service
           predicates:
             - Path=/api/pricing/**
           filters:
             - StripPrefix=1
-        - id: test-route
-          uri: lb://pricing-service  # Nombre registrado en Eureka
+        - id: group-discount-service
+          uri: lb://group-discount-service
           predicates:
-            - Path=/test
+            - Path=/group-discount/**
           filters:
-            - StripPrefix=0  # No elimina ningún segmento de la ruta
+            - StripPrefix=1

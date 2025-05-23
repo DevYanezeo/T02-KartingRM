@@ -1,6 +1,6 @@
 spring:
   application:
-    name: client-service
+    name: group-discount-service
   cloud:
     config:
       enabled: true

@@ -14,6 +14,11 @@ import java.util.stream.Collectors;
 public class PricingController {
     private final PricingService pricingService;
 
+    @GetMapping("/test")
+    public String test() {
+        return "Servicio operativo";
+    }
+
     public PricingController(PricingService pricingService) {
         this.pricingService = pricingService;
     }
@@ -26,15 +31,6 @@ public class PricingController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
-
-    @RequestMapping("/test")
-    public class TestController {
-        @GetMapping
-        public String hello() {
-            return "Servicio operativo";
-        }
-    }
-
 
     @GetMapping("/search")
     public ResponseEntity<Pricing> getPricingByLapsAndDuration(

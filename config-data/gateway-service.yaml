@@ -22,7 +22,7 @@ spring:
             allowedHeaders: '*'
       routes:
         - id: pricing-service
-          uri: lb://pricing-service:8090
+          uri: lb://pricing-service:8091
           predicates:
             - Path=/api/pricing/**
           filters:

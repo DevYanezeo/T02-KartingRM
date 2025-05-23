@@ -27,3 +27,9 @@ spring:
             - Path=/api/pricing/**
           filters:
             - StripPrefix=1
+        - id: test-route
+          uri: lb://pricing-service  # Nombre registrado en Eureka
+          predicates:
+            - Path=/test
+          filters:
+            - StripPrefix=0  # No elimina ningún segmento de la ruta

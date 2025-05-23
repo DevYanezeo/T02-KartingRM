@@ -27,7 +27,6 @@ public class PricingController {
         return ResponseEntity.ok(dtos);
     }
 
-    @RestController
     @RequestMapping("/test")
     public class TestController {
         @GetMapping

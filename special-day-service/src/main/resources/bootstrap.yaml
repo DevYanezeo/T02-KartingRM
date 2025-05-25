@@ -1,6 +1,6 @@
 spring:
   application:
-    name: client-service
+    name: specialday_service
   cloud:
     config:
       enabled: true

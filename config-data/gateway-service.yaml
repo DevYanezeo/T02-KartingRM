@@ -39,3 +39,9 @@ spring:
             - Path=/loyalty/**
           filters:
             - StripPrefix=1
+        - id: client-service
+          uri: lb://client-service
+          predicates:
+            - Path=/client/**
+          filters:
+            - StripPrefix=1

@@ -33,3 +33,9 @@ spring:
             - Path=/group-discount/**
           filters:
             - StripPrefix=1
+        - id: loyalty-service
+          uri: lb://loyalty-service
+          predicates:
+            - Path=/loyalty/**
+          filters:
+            - StripPrefix=1

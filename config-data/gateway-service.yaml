@@ -45,3 +45,9 @@ spring:
             - Path=/client/**
           filters:
             - StripPrefix=1
+        - id: specialday_service
+          uri: lb://specialday_service
+          predicates:
+            - Path=/api/special-pricing/**
+          filters:
+            - StripPrefix=1

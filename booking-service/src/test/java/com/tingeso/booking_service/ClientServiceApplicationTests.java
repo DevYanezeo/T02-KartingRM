@@ -1,4 +1,4 @@
-package com.tingeso.client_service;
+package com.tingeso.booking_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface BookingParticipantRepository extends JpaRepository<BookingParticipant, Long> {
     List<BookingParticipant> findByBooking(Booking booking);
+
+    int countByEmail(String email);
 }

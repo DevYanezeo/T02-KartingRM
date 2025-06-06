@@ -36,7 +36,7 @@ spring:
           predicates:
             - Path=/loyalty/**
           filters:
-        - id: specialday_service
+        - id: specialday-service
           uri: lb://SPECIALDAY-SERVICE
           predicates:
             - Path=/api/special-pricing/**

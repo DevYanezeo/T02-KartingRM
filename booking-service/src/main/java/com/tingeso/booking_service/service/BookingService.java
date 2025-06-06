@@ -12,6 +12,32 @@ import org.springframework.web.client.RestTemplate;
 import java.time.*;
 import java.util.*;
 
+// DTO para recibir la respuesta de special-day-service
+class SpecialPricingDTO {
+    private boolean isSpecialDay;
+    private String dayType;
+    private String dayName;
+    private double priceMultiplier;
+    private Integer maxApplicablePersons;
+    private double discountPercentage;
+    private String message;
+    // Getters y setters
+    public boolean isSpecialDay() { return isSpecialDay; }
+    public void setSpecialDay(boolean specialDay) { isSpecialDay = specialDay; }
+    public String getDayType() { return dayType; }
+    public void setDayType(String dayType) { this.dayType = dayType; }
+    public String getDayName() { return dayName; }
+    public void setDayName(String dayName) { this.dayName = dayName; }
+    public double getPriceMultiplier() { return priceMultiplier; }
+    public void setPriceMultiplier(double priceMultiplier) { this.priceMultiplier = priceMultiplier; }
+    public Integer getMaxApplicablePersons() { return maxApplicablePersons; }
+    public void setMaxApplicablePersons(Integer maxApplicablePersons) { this.maxApplicablePersons = maxApplicablePersons; }
+    public double getDiscountPercentage() { return discountPercentage; }
+    public void setDiscountPercentage(double discountPercentage) { this.discountPercentage = discountPercentage; }
+    public String getMessage() { return message; }
+    public void setMessage(String message) { this.message = message; }
+}
+
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -21,7 +47,7 @@ public class BookingService {
     @Autowired
     private BookingParticipantRepository participantRepository;
     @Autowired
-    private InvoiceRepository InvoiceRepository;
+    private InvoiceRepository invoiceRepository;
     @Autowired
     private RestTemplate restTemplate;
 
@@ -57,6 +83,21 @@ public class BookingService {
         booking.setStatus(Booking.Status.PENDIENTE);
         booking.setNumVueltas(request.getNumVueltas());
 
+        // Obtener descuento de grupo según el tamaño del grupo
+        int groupSize = request.getParticipantes().size();
+        Integer descuentoGrupo = restTemplate.getForObject(
+            "http://GROUP-DISCOUNT-SERVICE/group-discount/" + groupSize, Integer.class
+        );
+        System.out.println("Descuento de grupo para " + groupSize + " personas: " + descuentoGrupo + "%");
+
+        // Llamar a special-day-service una vez para saber si es fin de semana o feriado
+        SpecialPricingDTO specialDayInfo = getSpecialDayInfo(date, null, groupSize, null);
+        boolean esCumple = false;
+        int birthdayDiscountsLeft = 0;
+        if (specialDayInfo.isSpecialDay() && "BIRTHDAY".equals(specialDayInfo.getDayType()) && specialDayInfo.getMaxApplicablePersons() != null) {
+            birthdayDiscountsLeft = specialDayInfo.getMaxApplicablePersons();
+        }
+
         List<BookingParticipant> participantes = new ArrayList<>();
         for (BookingParticipantDTO dto : request.getParticipantes()) {
             BookingParticipant participante = new BookingParticipant();
@@ -64,6 +105,44 @@ public class BookingService {
             participante.setEmail(dto.getEmail());
             participante.setFechaNacimiento(dto.getFechaNacimiento());
             participante.setBooking(booking);
+
+            // 1. Contar visitas previas de este email
+            int visitas = participantRepository.countByEmail(dto.getEmail());
+
+            // 2. Llamar a loyalty-service para obtener el descuento
+            Integer descuentoLoyalty = restTemplate.getForObject(
+                "http://LOYALTY-SERVICE/loyalty/discount?visits=" + visitas, Integer.class
+            );
+
+            double precioBase = pricing.getBasePrice();
+            double precioConEspecial = precioBase;
+
+            // 3. Lógica para aplicar descuento especial
+            // Si es cumpleaños, verifica si el participante cumple años hoy
+            boolean aplicaCumple = false;
+            SpecialPricingDTO birthdayInfo = getSpecialDayInfo(date, null, groupSize, dto.getEmail());
+            if (birthdayInfo.isSpecialDay() && "BIRTHDAY".equals(birthdayInfo.getDayType()) && birthdayInfo.getDiscountPercentage() > 0 && birthdayDiscountsLeft > 0) {
+                precioConEspecial = precioBase - (precioBase * birthdayInfo.getDiscountPercentage() / 100.0);
+                birthdayDiscountsLeft--;
+                aplicaCumple = true;
+            } else if (specialDayInfo.isSpecialDay() && ("WEEKEND".equals(specialDayInfo.getDayType()) || "HOLIDAY".equals(specialDayInfo.getDayType()))) {
+                precioConEspecial = precioBase * specialDayInfo.getPriceMultiplier();
+            }
+
+            // 4. Aplica los otros descuentos sobre el precio ajustado
+            double precioConDescuentoGrupo = precioConEspecial - (precioConEspecial * descuentoGrupo / 100.0);
+            double precioConDescuentoTotal = precioConDescuentoGrupo - (precioConDescuentoGrupo * descuentoLoyalty / 100.0);
+
+            System.out.println("Participante: " + dto.getNombre() + " (" + dto.getEmail() + ")");
+            System.out.println("Visitas: " + visitas);
+            System.out.println("Descuento Loyalty: " + descuentoLoyalty + "%");
+            System.out.println("Descuento Grupo: " + descuentoGrupo + "%");
+            System.out.println("Precio base: " + precioBase);
+            System.out.println("Precio con descuento especial: " + precioConEspecial);
+            System.out.println("Precio con descuento de grupo: " + precioConDescuentoGrupo);
+            System.out.println("Precio final con ambos descuentos: " + precioConDescuentoTotal);
+
+            // participante.setPrecioFinal(precioConDescuentoTotal); // Si tienes este campo
             participantes.add(participante);
         }
         booking.setParticipantes(participantes);
@@ -102,6 +181,15 @@ public class BookingService {
         bookingDTO.setKartsAsignados(booking.getAssignedKarts());
 
         return bookingDTO;
+    }
+
+    // Método para llamar a special-day-service
+    private SpecialPricingDTO getSpecialDayInfo(LocalDate date, Long userId, Integer groupSize, String email) {
+        String url = "http://SPECIAL-DAY-SERVICE/api/special-pricing/info?date=" + date;
+        if (userId != null) url += "&userId=" + userId;
+        if (groupSize != null) url += "&groupSize=" + groupSize;
+        if (email != null) url += "&userId=" + email;
+        return restTemplate.getForObject(url, SpecialPricingDTO.class);
     }
 
     // Métodos auxiliares (solo firmas, implementa según tus necesidades):

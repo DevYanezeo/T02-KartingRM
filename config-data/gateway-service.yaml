@@ -22,43 +22,43 @@ spring:
             allowedHeaders: '*'
       routes:
         - id: pricing-service
-          uri: lb://pricing-service
+          uri: lb://PRICING-SERVICE
           predicates:
             - Path=/api/pricing{/**}
           filters:
             - StripPrefix=1
         - id: group-discount-service
-          uri: lb://group-discount-service
+          uri: lb://GROUP-DISCOUNT-SERVICE
           predicates:
             - Path=/group-discount{/**}
           filters:
             - StripPrefix=1
         - id: loyalty-service
-          uri: lb://loyalty-service
+          uri: lb://LOYALTY-SERVICE
           predicates:
             - Path=/loyalty{/**}
           filters:
             - StripPrefix=1
         - id: specialday_service
-          uri: lb://specialday_service
+          uri: lb://SPECIALDAY-SERVICE
           predicates:
             - Path=/api/special-pricing{/**}
           filters:
             - StripPrefix=1
         - id: booking_service
-          uri: lb://booking_service
+          uri: lb://BOOKING-SERVICE
           predicates:
             - Path=/api/bookings{/**}
           filters:
             - StripPrefix=1
         - id: kart_service
-          uri: lb://kart_service
+          uri: lb://KART-SERVICE
           predicates:
             - Path=/api/kart{/**}
           filters:
             - StripPrefix=1
         - id: rack_service
-          uri: lb://rack_service
+          uri: lb://RACK-SERVICE
           predicates:
             - Path=/api/rack{/**}
           filters:

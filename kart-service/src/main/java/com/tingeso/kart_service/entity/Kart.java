@@ -4,46 +4,28 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
-
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "Kart")
 public class Kart {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "kart_code")
+    private String kartCode;
 
     @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false, unique = true)
-    private String email;
+    private String model;
 
     @Column(nullable = false)
-    private LocalDate birthDate;
+    private boolean underMaintenance = false;
 
-    @Column(nullable = false)
-    private Integer monthlyVisits = 0;
+    private String description;
 
-    // Método para determinar la categoría del cliente según visitas mensuales (PDF página 3)
-    public String getClientCategory() {
-        if (monthlyVisits >= 7) return "MUY_FRECUENTE";
-        if (monthlyVisits >= 5) return "FRECUENTE";
-        if (monthlyVisits >= 2) return "REGULAR";
-        return "NO_FRECUENTE";
-    }
+    @Column(name = "last_maintenance")
+    private LocalDate lastMaintenance;
 
-    // Método para incrementar visitas mensuales
-    public void incrementMonthlyVisits() {
-        this.monthlyVisits += 1;
-    }
-
-
-    // Método para verificar si hoy es su cumpleaños (PDF página 3)
-    public boolean isBirthdayToday() {
-        LocalDate today = LocalDate.now();
-        return birthDate.getMonth() == today.getMonth()
-                && birthDate.getDayOfMonth() == today.getDayOfMonth();
-    }
 }

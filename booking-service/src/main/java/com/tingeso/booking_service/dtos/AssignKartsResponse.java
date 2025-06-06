@@ -1,10 +1,8 @@
-package com.tingeso.rack_service.dto;
+package com.tingeso.booking_service.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
 import java.util.List;
+
 
 @Data
 @AllArgsConstructor

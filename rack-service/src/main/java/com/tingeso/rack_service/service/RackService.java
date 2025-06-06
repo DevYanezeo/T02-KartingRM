@@ -34,7 +34,7 @@ public class RackService {
 
     // Método para consultar karts activos en kart-service
     public List<KartDTO> getAvailableKarts() {
-        String url = "http://KART-SERVICE/api/karts/available";
+        String url = "http://KART-SERVICE/api/kart/available";
         KartDTO[] karts = restTemplate.getForObject(url, KartDTO[].class);
         return Arrays.asList(karts);
     }

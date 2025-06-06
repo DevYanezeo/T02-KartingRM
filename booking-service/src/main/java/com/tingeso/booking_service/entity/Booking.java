@@ -31,7 +31,7 @@ public class Booking {
     private Invoice invoice;
 
     @ElementCollection
-    private List<String> kartsAsignados;
+    private List<String> assignedKarts;
 
     public enum Status {
         PENDIENTE, CONFIRMADA, CANCELADA

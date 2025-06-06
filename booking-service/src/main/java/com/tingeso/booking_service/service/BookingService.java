@@ -21,49 +21,86 @@ public class BookingService {
     @Autowired
     private BookingParticipantRepository participantRepository;
     @Autowired
-    private InvoiceRepository invoiceRepository;
+    private InvoiceRepository InvoiceRepository;
     @Autowired
     private RestTemplate restTemplate;
 
     @Transactional
     public BookingDTO createBooking(BookingRequestDTO request) {
-        // 1. Obtener tarifa base y duración desde pricing-service usando laps
+        // 1. Obtener tarifa y duración desde pricing-service
         PricingDTO pricing = getPricingByLaps(request.getNumVueltas());
 
-        // 2. Crear lista de participantes (aún sin descuentos)
+        // 2. Calcular fecha, hora de inicio y fin, cantidad de karts
+        LocalDate date = request.getFechaUso().toLocalDate();
+        LocalTime startTime = request.getFechaUso().toLocalTime();
+        int duration = pricing.getTotalDuration();
+        LocalTime endTime = startTime.plusMinutes(duration);
+        int quantity = request.getParticipantes().size();
+
+        // 3. Consultar disponibilidad de karts en rack-service
+        KartAvailabilityRequest availabilityRequest = new KartAvailabilityRequest();
+        availabilityRequest.setDate(date);
+        availabilityRequest.setStartTime(startTime);
+        availabilityRequest.setEndTime(endTime);
+        availabilityRequest.setQuantity(quantity);
+
+        KartAvailabilityResponse availabilityResponse = checkKartAvailability(availabilityRequest);
+
+        if (!availabilityResponse.isAvailable()) {
+            throw new RuntimeException("No hay suficientes karts disponibles para la fecha y hora solicitadas.");
+        }
+
+        // 4. Crear Booking y participantes (aún sin karts asignados)
+        Booking booking = new Booking();
+        booking.setBookingCode(generarCodigoReserva());
+        booking.setFechaReserva(LocalDateTime.now());
+        booking.setStatus(Booking.Status.PENDIENTE);
+        booking.setNumVueltas(request.getNumVueltas());
+
         List<BookingParticipant> participantes = new ArrayList<>();
         for (BookingParticipantDTO dto : request.getParticipantes()) {
             BookingParticipant participante = new BookingParticipant();
             participante.setNombre(dto.getNombre());
             participante.setEmail(dto.getEmail());
             participante.setFechaNacimiento(dto.getFechaNacimiento());
-            participante.setBooking(null); // Se asignará después de guardar Booking
+            participante.setBooking(booking);
             participantes.add(participante);
         }
-
-        // 3. Crear Booking
-        Booking booking = new Booking();
-        booking.setBookingCode(generarCodigoReserva());
-        booking.setFechaReserva(LocalDateTime.now());
-        booking.setStatus(Booking.Status.PENDIENTE);
-        booking.setNumVueltas(request.getNumVueltas());
         booking.setParticipantes(participantes);
-        booking.setKartsAsignados(new ArrayList<>()); // Por ahora vacío
-        // Asigna la relación inversa
-        for (BookingParticipant participante : participantes) {
-            participante.setBooking(booking);
-        }
+        booking.setAssignedKarts(new ArrayList<>()); // Se llenará después
+
         booking = bookingRepository.save(booking);
 
-        // 4. Mapear a BookingDTO para la respuesta
+        // 5. Solicitar asignación definitiva de karts a rack-service
+        AssignKartsRequest assignRequest = new AssignKartsRequest();
+        assignRequest.setDate(date);
+        assignRequest.setStartTime(startTime);
+        assignRequest.setEndTime(endTime);
+        assignRequest.setQuantity(quantity);
+        assignRequest.setBookingCode(booking.getBookingCode());
+
+        // rack-service debe devolver la lista de karts asignados
+        AssignKartsResponse assignResponse = restTemplate.postForObject(
+            "http://RACK-SERVICE/api/rack/assign", assignRequest, AssignKartsResponse.class
+        );
+
+        if (assignResponse == null || assignResponse.getAssignedKarts() == null || assignResponse.getAssignedKarts().isEmpty()) {
+            throw new RuntimeException("No se pudieron asignar karts a la reserva.");
+        }
+
+        // 6. Guardar los karts asignados en la reserva
+        booking.setAssignedKarts(assignResponse.getAssignedKarts());
+        booking = bookingRepository.save(booking);
+
+        // 7. Mapear a BookingDTO para la respuesta
         BookingDTO bookingDTO = new BookingDTO();
         bookingDTO.setId(booking.getId());
         bookingDTO.setFechaReserva(booking.getFechaReserva());
         bookingDTO.setStatus(booking.getStatus().name());
         bookingDTO.setNumVueltas(booking.getNumVueltas());
         bookingDTO.setParticipantes(request.getParticipantes());
-        bookingDTO.setKartsAsignados(booking.getKartsAsignados());
-        // No se incluye invoice aún
+        bookingDTO.setKartsAsignados(booking.getAssignedKarts());
+
         return bookingDTO;
     }
 
@@ -76,6 +113,11 @@ public class BookingService {
     private PricingDTO getPricingByLaps(Integer laps) {
         String url = "http://PRICING-SERVICE/api/pricing/laps/" + laps;
         return restTemplate.getForObject(url, PricingDTO.class);
+    }
+
+    public KartAvailabilityResponse checkKartAvailability(KartAvailabilityRequest request) {
+        String url = "http://RACK-SERVICE/api/rack/available";
+        return restTemplate.postForObject(url, request, KartAvailabilityResponse.class);
     }
 
     private int getGroupDiscount(int numPersonas) {

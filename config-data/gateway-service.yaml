@@ -24,42 +24,42 @@ spring:
         - id: pricing-service
           uri: lb://pricing-service
           predicates:
-            - Path=/api/pricing/**
+            - Path=/api/pricing{/**}
           filters:
             - StripPrefix=1
         - id: group-discount-service
           uri: lb://group-discount-service
           predicates:
-            - Path=/group-discount/**
+            - Path=/group-discount{/**}
           filters:
             - StripPrefix=1
         - id: loyalty-service
           uri: lb://loyalty-service
           predicates:
-            - Path=/loyalty/**
+            - Path=/loyalty{/**}
           filters:
             - StripPrefix=1
         - id: specialday_service
           uri: lb://specialday_service
           predicates:
-            - Path=/api/special-pricing/**
+            - Path=/api/special-pricing{/**}
           filters:
             - StripPrefix=1
         - id: booking_service
           uri: lb://booking_service
           predicates:
-            - Path=/api/bookings/**
+            - Path=/api/bookings{/**}
           filters:
             - StripPrefix=1
         - id: kart_service
           uri: lb://kart_service
           predicates:
-            - Path=/api/kart/**
+            - Path=/api/kart{/**}
           filters:
             - StripPrefix=1
         - id: rack_service
           uri: lb://rack_service
           predicates:
-            - Path=/api/rack/**
+            - Path=/api/rack{/**}
           filters:
             - StripPrefix=1

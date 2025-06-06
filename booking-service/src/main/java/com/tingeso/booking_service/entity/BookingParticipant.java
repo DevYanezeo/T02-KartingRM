@@ -3,7 +3,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 
 
@@ -19,7 +19,7 @@ public class BookingParticipant {
     private String nombre;      // Nombre del participante
     private String email;       // Email del participante
 
-    private LocalDateTime fechaNacimiento;        
+    private LocalDate fechaNacimiento;        
 
     @ManyToOne
     @JoinColumn(name = "booking_id")

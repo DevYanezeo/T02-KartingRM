@@ -1,10 +1,10 @@
-package com.tingeso.client_service;
+package com.tingeso.kart_service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ClientServiceApplicationTests {
+class KartServiceApplicationTests {
 
 	@Test
 	void contextLoads() {

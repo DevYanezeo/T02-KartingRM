@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.tingeso</groupId>
-	<artifactId>client-service</artifactId>
+	<artifactId>kart-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>client-service</name>
-	<description>Microservicio que representa un Cliente</description>
+	<name>kart-service</name>
+	<description>Microservicio que representa un Kart</description>
 	<url/>
 	<licenses>
 		<license/>

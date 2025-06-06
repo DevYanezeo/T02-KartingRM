@@ -49,6 +49,10 @@ public class BookingService {
         booking.setNumVueltas(request.getNumVueltas());
         booking.setParticipantes(participantes);
         booking.setKartsAsignados(new ArrayList<>()); // Por ahora vacío
+        // Asigna la relación inversa
+        for (BookingParticipant participante : participantes) {
+            participante.setBooking(booking);
+        }
         booking = bookingRepository.save(booking);
 
         // 4. Mapear a BookingDTO para la respuesta
@@ -117,7 +121,7 @@ public class BookingService {
     }
 
     private String generarCodigoReserva() {
-        // Genera un código único para la reserva
-        return UUID.randomUUID().toString();
+        String alfanumerico = UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase();
+        return "RES-" + alfanumerico;
     }
 }

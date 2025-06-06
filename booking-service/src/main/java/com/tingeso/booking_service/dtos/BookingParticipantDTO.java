@@ -1,7 +1,7 @@
 package com.tingeso.booking_service.dtos;
 
 import lombok.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -9,5 +9,5 @@ import java.time.LocalDateTime;
 public class BookingParticipantDTO {
     private String nombre;
     private String email;
-    private LocalDateTime fechaNacimiento;
+    private LocalDate fechaNacimiento;
 }

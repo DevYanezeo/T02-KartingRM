@@ -1,4 +1,4 @@
-package com.tingeso.client_service.entity;
+package com.tingeso.kart_service.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Client {
+public class Kart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -51,3 +51,15 @@ spring:
             - Path=/api/bookings/**
           filters:
             - StripPrefix=1
+        - id: kart_service
+          uri: lb://kart_service
+          predicates:
+            - Path=/api/kart/**
+          filters:
+            - StripPrefix=1
+        - id: rack_service
+          uri: lb://rack_service
+          predicates:
+            - Path=/api/rack/**
+          filters:
+            - StripPrefix=1

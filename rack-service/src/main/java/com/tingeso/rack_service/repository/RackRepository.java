@@ -12,7 +12,7 @@ import java.util.List;
 
 @Repository
 public interface RackRepository extends JpaRepository<Rack, Long> {
-    List<Rack> findByDate(LocalDate date);
+    List<Rack> findByFecha(LocalDate fecha);
 
     @Query("SELECT r FROM Rack r WHERE r.fecha = :date AND r.horaInicio < :endTime AND r.horaFin > :startTime")
     List<Rack> findOverlappingBlocks(@Param("date") LocalDate date, @Param("startTime") LocalTime startTime, @Param("endTime") LocalTime endTime);

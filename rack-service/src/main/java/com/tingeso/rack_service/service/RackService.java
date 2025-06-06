@@ -29,7 +29,7 @@ public class RackService {
     }
 
     public List<Rack> getRackByDate(LocalDate date) {
-        return rackRepository.findByDate(date);
+        return rackRepository.findByFecha(date);
     }
 
     // Método para consultar karts activos en kart-service

@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.tingeso</groupId>
-	<artifactId>client-service</artifactId>
+	<artifactId>booking-service</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>client-service</name>
-	<description>Microservicio que representa un Cliente</description>
+	<name>booking-service</name>
+	<description>Microservicio que representa una reserva</description>
 	<url/>
 	<licenses>
 		<license/>

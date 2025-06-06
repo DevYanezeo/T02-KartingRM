@@ -32,6 +32,12 @@ public class PricingController {
         return ResponseEntity.ok(dtos);
     }
 
+    @GetMapping("/laps/{laps}")
+    public ResponseEntity<Pricing> getPricingByLaps(@PathVariable int laps) {
+        Pricing pricing = pricingService.getPricingByLaps(laps);
+        return ResponseEntity.ok(pricing);
+    }
+    
     @GetMapping("/search")
     public ResponseEntity<Pricing> getPricingByLapsAndDuration(
             @RequestParam int laps,

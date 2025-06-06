@@ -5,44 +5,26 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Entity
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "invoices")
+@NoArgsConstructor
+@Entity
 public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String invoiceNumber;
+    private String invoiceCode; // Código único del comprobante
+    private LocalDateTime fechaEmision; // Fecha de emisión del comprobante
 
-    @Column(nullable = false)
-    private LocalDateTime issueDate;
+    private Integer montoTotalSinIVA; // Suma de todos los montos finales sin IVA
+    private Integer ivaTotal;         // Suma total del IVA
+    private Integer montoTotalConIVA; // Suma total con IVA
 
-    @Column(nullable = false)
-    private Long bookingId;
+    private String pdfUrl; // URL o ruta del comprobante PDF generado
 
-    @Column(nullable = false)
-    private Double basePrice;
+    @OneToOne
+    @JoinColumn(name = "booking_id")
+    private Booking booking; // Referencia a la reserva
 
-    @Column(nullable = false)
-    private Double subtotal;
-
-    @Column(nullable = false)
-    private Double iva;
-
-    @Column(nullable = false)
-    private Double total;
-
-    @Column(columnDefinition = "TEXT")
-    private String discountDetails; // JSON con descuentos
-
-    @Lob
-    @Column(columnDefinition = "LONGBLOB")
-    private byte[] pdfData;
-
-    @Column(nullable = false)
-    private Boolean pdfGenerated = false;
 }

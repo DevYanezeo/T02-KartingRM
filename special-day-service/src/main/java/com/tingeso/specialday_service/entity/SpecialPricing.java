@@ -5,35 +5,46 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-@Entity
 @Data
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "special_pricing")
 public class SpecialPricing {
+    public enum PricingType {
+        WEEKEND,
+        HOLIDAY,
+        BIRTHDAY
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String type; // "WEEKEND", "HOLIDAY", "BIRTHDAY"
+    private PricingType type;
 
+    // Para WEEKEND: "SATURDAY"/"SUNDAY"
+    // Para HOLIDAY: nombre del feriado ("NAVIDAD", "FIESTAS_PATRIAS")
     @Column
-    private String dayName; // "SATURDAY", "SUNDAY", "NAVIDAD", etc.
+    private String dayName;
 
+    // Para HOLIDAY: fecha específica (opcional)
     @Column
-    private LocalDate specificDate; // Para feriados específicos
+    private LocalDate specificDate;
 
     @Column(nullable = false)
-    private Double priceMultiplier = 1.0; // 1.5 = +50%
+    private Double priceMultiplier = 1.0;
 
+    // Para BIRTHDAY:
     @Column
-    private Integer minGroupSize; // Para promociones grupales
+    private Integer minGroupSize;
 
     @Column
     private Integer maxGroupSize;
 
     @Column
-    private Integer maxBirthdayPersons; // Máximo de personas con descuento
+    private Integer maxBirthdayPersons;
 
-    @Column
-    private Double birthdayDiscount; // 0.5 = 50%
 }

@@ -1,17 +1,14 @@
 package com.tingeso.booking_service.dtos;
+import lombok.*;
 
-import lombok.Data;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class BookingRequestDTO {
-    private LocalDate date;
-    private LocalTime startTime;
-    private Integer laps;
-    private Long clientId;
-    private List<Long> participantIds;
-    private String paymentMethod;
+    private LocalDateTime fechaUso;
+    private Integer numVueltas;
+    private List<BookingParticipantDTO> participantes;
 }

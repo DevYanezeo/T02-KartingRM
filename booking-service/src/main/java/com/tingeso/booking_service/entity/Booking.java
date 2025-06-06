@@ -5,58 +5,35 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "bookings")
+@NoArgsConstructor
+@Entity
 public class Booking {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(unique = true, length = 12)
-    private String reservationCode; // Ej: RES-ABC123
-
-    @Column(nullable = false)
-    private LocalDate date;
-
-    @Column(nullable = false)
-    private LocalTime startTime;
-
-    @Column(nullable = false)
-    private LocalTime endTime;
-
-    @Column(nullable = false)
-    private Integer duration; // En minutos: 30, 35, 40
-
-    @Column(nullable = false)
-    private Integer laps; // 10, 15 o 20
+    private String bookingCode;
+    private LocalDateTime fechaReserva; // Fecha y hora en que se hizo la reserva
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Status status = Status.CONFIRMED;
+    private Status status;              // Estado de la reserva
 
-    @Column(nullable = false)
-    private Long clientId; // ID del cliente dueño
+    private Integer numVueltas;         // Número de vueltas reservadas
 
-    @Column(columnDefinition = "TEXT")
-    private String participantIds; // JSON: [1, 2, 3]
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<BookingParticipant> participantes;
 
-    @Column(columnDefinition = "TEXT")
-    private String assignedKarts; // JSON: ["K001", "K002"]
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
+    private Invoice invoice;
 
-    @Column(nullable = false)
-    private Long pricingId; // ID de tarifa
-
-    @Column(nullable = false)
-    private Long invoiceId; // Relación con Invoice
+    @ElementCollection
+    private List<String> kartsAsignados;
 
     public enum Status {
-        CONFIRMED, CANCELLED, COMPLETED
+        PENDIENTE, CONFIRMADA, CANCELADA
     }
 }

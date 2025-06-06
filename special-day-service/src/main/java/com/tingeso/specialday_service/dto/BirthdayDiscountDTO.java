@@ -4,11 +4,8 @@ import lombok.Data;
 
 @Data
 public class BirthdayDiscountDTO {
+    private boolean qualifies;
     private Integer maxApplicablePersons;
-    private Double discountPercentage;
-
-    public BirthdayDiscountDTO(Integer maxApplicablePersons, Double discountPercentage) {
-        this.maxApplicablePersons = maxApplicablePersons;
-        this.discountPercentage = discountPercentage;
-    }
+    private double discountPercentage;
+    private String message;
 }

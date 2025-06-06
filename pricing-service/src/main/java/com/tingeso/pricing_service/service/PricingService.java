@@ -48,4 +48,9 @@ public class PricingService {
         Pricing pricing = getPricingById(id);
         pricingRepository.delete(pricing);
     }
+
+    public Pricing getPricingByLaps(int laps) {
+        return pricingRepository.findByLaps(laps)
+                .orElseThrow(() -> new RuntimeException("No se encontró pricing para esas vueltas"));
+    }
 }

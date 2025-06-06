@@ -14,4 +14,6 @@ public interface PricingRepository extends JpaRepository<Pricing, Long> {
 
     @Query("SELECT p.totalDuration FROM Pricing p WHERE p.laps = :laps")
     Optional<Integer> findDurationByLaps(@Param("laps") int laps);
+
+    Optional<Pricing> findByLaps(int laps);
 }

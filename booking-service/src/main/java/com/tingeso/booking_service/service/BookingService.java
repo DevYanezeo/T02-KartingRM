@@ -1,9 +1,9 @@
 package com.tingeso.booking_service.service;
 
-
 import com.tingeso.booking_service.dtos.*;
 import com.tingeso.booking_service.entity.*;
 import com.tingeso.booking_service.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,74 +11,113 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class BookingService {
 
     @Autowired
     private BookingRepository bookingRepository;
-
+    @Autowired
+    private BookingParticipantRepository participantRepository;
     @Autowired
     private InvoiceRepository invoiceRepository;
-
     @Autowired
     private RestTemplate restTemplate;
 
-    @Autowired
-    private ReceiptService receiptService;
-
     @Transactional
-    public BookingResponseDTO    createBooking(BookingRequestDTO request) {
-        // 1. Validar horario comercial
-        validateBusinessHours(request);
+    public BookingDTO createBooking(BookingRequestDTO request) {
+        // 1. Obtener tarifa base y duración desde pricing-service usando laps
+        PricingDTO pricing = getPricingByLaps(request.getNumVueltas());
 
-        // 2. Obtener información del cliente
-        ClientDTO owner = getClientInfo(request.getClientId());
+        // 2. Crear lista de participantes (aún sin descuentos)
+        List<BookingParticipant> participantes = new ArrayList<>();
+        for (BookingParticipantDTO dto : request.getParticipantes()) {
+            BookingParticipant participante = new BookingParticipant();
+            participante.setNombre(dto.getNombre());
+            participante.setEmail(dto.getEmail());
+            participante.setFechaNacimiento(dto.getFechaNacimiento());
+            participante.setBooking(null); // Se asignará después de guardar Booking
+            participantes.add(participante);
+        }
 
-        // 3. Calcular duración
-        Integer duration = getDuration(request.getLaps());
-
-        // 4. Asignar karts
-        List<String> assignedKarts = assignKarts(request.getDate(), request.getStartTime(),
-                duration, request.getParticipantIds().size() + 1);
-
-        // 5. Obtener tarifa
-        PricingDTO pricing = getPricingInfo(request.getLaps(), duration);
-
-        // 6. Calcular precios y descuentos
-        PriceCalculationResult priceResult = calculateFinalPrice(request, pricing.getBasePrice());
-
-        // 7. Crear reserva
-        Booking booking = createBookingEntity(request, duration, assignedKarts, pricing.getId());
+        // 3. Crear Booking
+        Booking booking = new Booking();
+        booking.setBookingCode(generarCodigoReserva());
+        booking.setFechaReserva(LocalDateTime.now());
+        booking.setStatus(Booking.Status.PENDIENTE);
+        booking.setNumVueltas(request.getNumVueltas());
+        booking.setParticipantes(participantes);
+        booking.setKartsAsignados(new ArrayList<>()); // Por ahora vacío
         booking = bookingRepository.save(booking);
 
-        // 8. Crear factura
-        Invoice invoice = createInvoice(booking, priceResult, owner);
-        invoice = invoiceRepository.save(invoice);
-
-        // 9. Actualizar booking con invoiceId
-        booking.setInvoiceId(invoice.getId());
-        bookingRepository.save(booking);
-
-        // 10. Actualizar visitas de clientes
-        updateClientVisits(request.getClientId(), request.getParticipantIds());
-
-        return mapToBookingResponse(booking, invoice, assignedKarts, owner);
+        // 4. Mapear a BookingDTO para la respuesta
+        BookingDTO bookingDTO = new BookingDTO();
+        bookingDTO.setId(booking.getId());
+        bookingDTO.setFechaReserva(booking.getFechaReserva());
+        bookingDTO.setStatus(booking.getStatus().name());
+        bookingDTO.setNumVueltas(booking.getNumVueltas());
+        bookingDTO.setParticipantes(request.getParticipantes());
+        bookingDTO.setKartsAsignados(booking.getKartsAsignados());
+        // No se incluye invoice aún
+        return bookingDTO;
     }
 
-    private void validateBusinessHours(BookingRequestDTO request) {
-        Boolean isValid = restTemplate.getForObject(
-                "http://business-hour-service/api/business-hours/validate?" +
-                        "date=" + request.getDate() +
-                        "&startTime=" + request.getStartTime() +
-                        "&duration=" + getDuration(request.getLaps()),
-                Boolean.class);
+    // Métodos auxiliares (solo firmas, implementa según tus necesidades):
 
-        if (!Boolean.TRUE.equals(isValid)) {
-            throw new IllegalArgumentException("El horario de reserva está fuera del horario comercial");
-        }
+    private void validateBusinessHoursAndTrack(BookingRequestDTO request) {
+        // Llama a track-service y/o business-hour-service para validar horario y disponibilidad
     }
 
-    // ... otros métodos auxiliares
+    private PricingDTO getPricingByLaps(Integer laps) {
+        String url = "http://PRICING-SERVICE/api/pricing/laps/" + laps;
+        return restTemplate.getForObject(url, PricingDTO.class);
+    }
+
+    private int getGroupDiscount(int numPersonas) {
+        // Llama a group-discount-service
+        return restTemplate.getForObject("http://group-discount-service/api/discount?groupSize=" + numPersonas, Integer.class);
+    }
+
+    private int getLoyaltyDiscount(List<BookingParticipantDTO> participantes) {
+        // Llama a loyalty-service para cada participante y suma los descuentos
+        return 0; // Implementa la lógica real
+    }
+
+    private int getSpecialDayDiscount(BookingRequestDTO request) {
+        // Llama a special-day-service para verificar si aplica descuento especial
+        return 0; // Implementa la lógica real
+    }
+
+    private List<BookingParticipant> calcularPreciosPorParticipante(
+        List<BookingParticipantDTO> participantesDTO,
+        PricingDTO pricing,
+        int descuentoGrupo,
+        int descuentoFrecuente,
+        int descuentoEspecial
+    ) {
+        // Calcula el precio final para cada participante, aplicando los descuentos
+        // Devuelve la lista de BookingParticipant
+        return new ArrayList<>();
+    }
+
+    private List<String> assignKarts(LocalDateTime fechaUso, int numPersonas) {
+        // Llama a track-service para asignar karts disponibles
+        return new ArrayList<>();
+    }
+
+    private Invoice generarInvoice(Booking booking, List<BookingParticipant> participantes) {
+        // Genera el comprobante de pago (Invoice) con los totales, IVA, etc.
+        return new Invoice();
+    }
+
+    private BookingDTO mapToBookingDTO(Booking booking, List<BookingParticipant> participantes, Invoice invoice) {
+        // Mapea las entidades a un DTO de respuesta
+        return new BookingDTO();
+    }
+
+    private String generarCodigoReserva() {
+        // Genera un código único para la reserva
+        return UUID.randomUUID().toString();
+    }
 }

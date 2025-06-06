@@ -1,8 +1,7 @@
-package com.tingeso.pricing_service.DTOs;
+package com.tingeso.booking_service.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.*;
-
 
 @Data
 @AllArgsConstructor

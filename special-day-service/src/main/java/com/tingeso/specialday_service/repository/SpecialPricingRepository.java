@@ -8,23 +8,24 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SpecialPricingRepository extends JpaRepository<SpecialPricing, Long> {
 
     @Query("SELECT sp FROM SpecialPricing sp WHERE " +
-            "sp.isActive = true AND (" +
-            "(sp.type = 'WEEKEND' AND sp.dayName = :dayName) OR " +
-            "(sp.type = 'HOLIDAY' AND (sp.specificDate = :date OR " +
-            "(EXTRACT(MONTH FROM sp.specificDate) = EXTRACT(MONTH FROM :date) AND " +
-            "EXTRACT(DAY FROM sp.specificDate) = EXTRACT(DAY FROM :date))))")
-    List<SpecialPricing> findActivePricingForDate(
-            @Param("date") LocalDate date,
-            @Param("dayName") String dayName);
+            "sp.type = 'WEEKEND' AND sp.dayName = :dayName")
+    Optional<SpecialPricing> findWeekendPricing(@Param("dayName") String dayName);
 
     @Query("SELECT sp FROM SpecialPricing sp WHERE " +
-            "sp.isActive = true AND " +
+            "sp.type = 'HOLIDAY' AND " +
+            "(sp.dayName = :holidayName OR sp.specificDate = :date)")
+    Optional<SpecialPricing> findHolidayPricing(
+            @Param("holidayName") String holidayName,
+            @Param("date") LocalDate date);
+
+    @Query("SELECT sp FROM SpecialPricing sp WHERE " +
             "sp.type = 'BIRTHDAY' AND " +
             ":groupSize BETWEEN sp.minGroupSize AND sp.maxGroupSize")
-    SpecialPricing findBirthdayPromotion(@Param("groupSize") Integer groupSize);
+    Optional<SpecialPricing> findBirthdayPricing(@Param("groupSize") Integer groupSize);
 }

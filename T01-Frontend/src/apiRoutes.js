@@ -4,6 +4,6 @@ export const ROUTES = {
   DISCOUNTS: '/api/discounts',
   BOOKINGS: '/api/bookings',
   CLIENTS: '/api/client',
-  INVOICES: '/api/invoices',
+  INVOICES: '/api/bookings/invoices',
   // Agrega aquí otros endpoints según los microservicios y rutas de tu gateway
 }; 

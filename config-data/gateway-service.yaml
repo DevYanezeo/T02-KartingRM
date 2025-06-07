@@ -45,8 +45,6 @@ spring:
           uri: lb://BOOKING-SERVICE
           predicates:
             - Path=/api/bookings/**
-            - Path=/api/invoices
-            - Path=/api/invoices/**
           filters:
         - id: kart_service
           uri: lb://KART-SERVICE

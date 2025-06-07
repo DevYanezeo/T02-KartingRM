@@ -5,6 +5,7 @@ import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
 import { FaFileInvoice, FaSearch, FaFileDownload, FaSync, FaCalendarAlt } from 'react-icons/fa';
 import './Invoice.css';
+import { ROUTES } from '../apiRoutes';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -20,10 +21,8 @@ const Invoices = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_BASE}/api/invoices`);
-      
+      const response = await axios.get(`${API_BASE}${ROUTES.INVOICES}`);
       if (!response.data) throw new Error("No se recibieron datos");
-      
       // Validar que la respuesta sea un array
       const invoicesData = Array.isArray(response.data) ? response.data : [];
       setInvoices(invoicesData);
@@ -37,22 +36,19 @@ const Invoices = () => {
 
   // Filtrar boletas por término de búsqueda y fecha
   const filteredInvoices = invoices.filter(invoice => {
-    const matchesSearch = invoice.invoiceNumber?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         invoice.clientName?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const matchesSearch = invoice.invoiceCode?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         invoice.nombreResponsable?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDate = !filterDate || 
-                       (invoice.issueDate && new Date(invoice.issueDate).toISOString().split('T')[0] === filterDate);
-    
+                       (invoice.fechaEmision && new Date(invoice.fechaEmision).toISOString().split('T')[0] === filterDate);
     return matchesSearch && matchesDate;
   });
 
   // Descargar boleta PDF
   const downloadInvoice = async (id) => {
     try {
-      const response = await axios.get(`${API_BASE}/api/invoices/${id}/download`, {
+      const response = await axios.get(`${API_BASE}${ROUTES.INVOICES}/${id}/download`, {
         responseType: 'blob'
       });
-
       // Crear URL para el blob
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
@@ -60,7 +56,6 @@ const Invoices = () => {
       link.setAttribute('download', `comprobante_${id}.pdf`);
       document.body.appendChild(link);
       link.click();
-      
       // Limpiar
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
@@ -77,25 +72,22 @@ const Invoices = () => {
   return (
     <div className="invoices-page">
       <Navbar />
-      
       <main className="invoices-container">
         <header className="invoices-header">
           <h1><FaFileInvoice /> Gestión de Boletas</h1>
           <p>Visualiza y gestiona todas las boletas generadas en el sistema</p>
         </header>
-
         {/* Controles de búsqueda y filtro */}
         <div className="invoices-controls">
           <div className="search-box">
             <FaSearch className="search-icon" />
             <input
               type="text"
-              placeholder="Buscar por número o cliente..."
+              placeholder="Buscar por código o responsable..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
           <div className="date-filter">
             <FaCalendarAlt className="calendar-icon" />
             <input
@@ -112,7 +104,6 @@ const Invoices = () => {
               </button>
             )}
           </div>
-          
           <button 
             className="refresh-btn"
             onClick={fetchInvoices}
@@ -121,9 +112,7 @@ const Invoices = () => {
             <FaSync /> {loading ? 'Actualizando...' : 'Actualizar'}
           </button>
         </div>
-
         {error && <div className="error-message">{error}</div>}
-
         {/* Tabla de boletas */}
         <div className="invoices-table-container">
           {loading ? (
@@ -132,26 +121,20 @@ const Invoices = () => {
             <table className="invoices-table">
               <thead>
                 <tr>
-                  <th>N° Boleta</th>
-                  <th>Cliente</th>
+                  <th>Código</th>
+                  <th>Responsable</th>
                   <th>Fecha</th>
                   <th>Total</th>
-                  <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredInvoices.map((invoice) => (
                   <tr key={invoice.id}>
-                    <td>{invoice.invoiceNumber}</td>
-                    <td>{invoice.clientName || 'N/A'}</td>
-                    <td>{invoice.issueDate ? new Date(invoice.issueDate).toLocaleDateString() : 'N/A'}</td>
-                    <td>${invoice.totalAmount?.toFixed(2) || '0.00'}</td>
-                    <td>
-                      <span className={`status-badge ${invoice.paid ? 'paid' : 'pending'}`}>
-                        {invoice.paid ? 'Pagado' : 'Pendiente'}
-                      </span>
-                    </td>
+                    <td>{invoice.invoiceCode}</td>
+                    <td>{invoice.nombreResponsable || 'N/A'}</td>
+                    <td>{invoice.fechaEmision ? new Date(invoice.fechaEmision).toLocaleDateString() : 'N/A'}</td>
+                    <td>${invoice.montoTotalConIVA?.toLocaleString() || '0'}</td>
                     <td>
                       <button 
                         className="download-btn"
@@ -174,7 +157,6 @@ const Invoices = () => {
           )}
         </div>
       </main>
-
       <Footer />
     </div>
   );

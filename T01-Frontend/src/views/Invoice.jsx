@@ -6,6 +6,8 @@ import Footer from '../components/common/Footer';
 import { FaFileInvoice, FaSearch, FaFileDownload, FaSync, FaCalendarAlt } from 'react-icons/fa';
 import './Invoice.css';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,7 +20,7 @@ const Invoices = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('http://localhost:8090/api/invoices');
+      const response = await axios.get(`${API_BASE}/api/invoices`);
       
       if (!response.data) throw new Error("No se recibieron datos");
       
@@ -47,7 +49,7 @@ const Invoices = () => {
   // Descargar boleta PDF
   const downloadInvoice = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:8090/api/invoices/${id}/download`, {
+      const response = await axios.get(`${API_BASE}/api/invoices/${id}/download`, {
         responseType: 'blob'
       });
 

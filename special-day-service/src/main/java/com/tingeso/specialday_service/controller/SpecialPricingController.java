@@ -21,9 +21,10 @@ public class SpecialPricingController {
     @GetMapping("/info")
     public ResponseEntity<SpecialPricingDTO> getSpecialDayInfo(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(required = false) Long userId,
-            @RequestParam(required = false) Integer groupSize) {
-        SpecialPricingDTO dto = pricingService.getSpecialDayInfo(date, userId, groupSize);
+            @RequestParam(required = false) String userId,
+            @RequestParam(required = false) Integer groupSize,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate birthDate) {
+        SpecialPricingDTO dto = pricingService.getSpecialDayInfo(date, userId, groupSize, birthDate);
         return ResponseEntity.ok(dto);
     }
 }

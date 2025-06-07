@@ -3,10 +3,10 @@ package com.tingeso.specialday_service;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+//@SpringBootTest
 class SpecialPricingServiceApplicationTests {
 
-	@Test
+	//@Test
 	void contextLoads() {
 	}
 

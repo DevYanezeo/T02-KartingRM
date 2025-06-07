@@ -8,35 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.*;
 import java.util.*;
-
-// DTO para recibir la respuesta de special-day-service
-class SpecialPricingDTO {
-    private boolean isSpecialDay;
-    private String dayType;
-    private String dayName;
-    private double priceMultiplier;
-    private Integer maxApplicablePersons;
-    private double discountPercentage;
-    private String message;
-    // Getters y setters
-    public boolean isSpecialDay() { return isSpecialDay; }
-    public void setSpecialDay(boolean specialDay) { isSpecialDay = specialDay; }
-    public String getDayType() { return dayType; }
-    public void setDayType(String dayType) { this.dayType = dayType; }
-    public String getDayName() { return dayName; }
-    public void setDayName(String dayName) { this.dayName = dayName; }
-    public double getPriceMultiplier() { return priceMultiplier; }
-    public void setPriceMultiplier(double priceMultiplier) { this.priceMultiplier = priceMultiplier; }
-    public Integer getMaxApplicablePersons() { return maxApplicablePersons; }
-    public void setMaxApplicablePersons(Integer maxApplicablePersons) { this.maxApplicablePersons = maxApplicablePersons; }
-    public double getDiscountPercentage() { return discountPercentage; }
-    public void setDiscountPercentage(double discountPercentage) { this.discountPercentage = discountPercentage; }
-    public String getMessage() { return message; }
-    public void setMessage(String message) { this.message = message; }
-}
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +27,9 @@ public class BookingService {
     private InvoiceRepository invoiceRepository;
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private InvoiceService invoiceService;
+
 
     @Transactional
     public BookingDTO createBooking(BookingRequestDTO request) {
@@ -91,14 +71,26 @@ public class BookingService {
         System.out.println("Descuento de grupo para " + groupSize + " personas: " + descuentoGrupo + "%");
 
         // Llamar a special-day-service una vez para saber si es fin de semana o feriado
-        SpecialPricingDTO specialDayInfo = getSpecialDayInfo(date, null, groupSize, null);
-        boolean esCumple = false;
+        SpecialPricingDTO specialDayInfo = getSpecialDayInfo(date, null, groupSize, null, null);
+
+        // Calcular cuántos cumplen años hoy
+        int cumpleanerosHoy = 0;
+        for (BookingParticipantDTO dto : request.getParticipantes()) {
+            if (dto.getFechaNacimiento() != null &&
+                dto.getFechaNacimiento().getDayOfMonth() == date.getDayOfMonth() &&
+                dto.getFechaNacimiento().getMonth() == date.getMonth()) {
+                cumpleanerosHoy++;
+            }
+        }
         int birthdayDiscountsLeft = 0;
-        if (specialDayInfo.isSpecialDay() && "BIRTHDAY".equals(specialDayInfo.getDayType()) && specialDayInfo.getMaxApplicablePersons() != null) {
-            birthdayDiscountsLeft = specialDayInfo.getMaxApplicablePersons();
+        if (groupSize >= 3 && groupSize <= 5) {
+            birthdayDiscountsLeft = Math.min(1, cumpleanerosHoy);
+        } else if (groupSize >= 6 && groupSize <= 10) {
+            birthdayDiscountsLeft = Math.min(2, cumpleanerosHoy);
         }
 
         List<BookingParticipant> participantes = new ArrayList<>();
+        List<DetalleParticipanteDTO> detalleParticipantes = new ArrayList<>();
         for (BookingParticipantDTO dto : request.getParticipantes()) {
             BookingParticipant participante = new BookingParticipant();
             participante.setNombre(dto.getNombre());
@@ -115,34 +107,67 @@ public class BookingService {
             );
 
             double precioBase = pricing.getBasePrice();
-            double precioConEspecial = precioBase;
+            double recargoEspecial = 0.0;
+            double descuentoCumple = 0.0;
+            double precioAntesDescuentos = precioBase;
+            boolean aplicaCumple = false;
 
             // 3. Lógica para aplicar descuento especial
-            // Si es cumpleaños, verifica si el participante cumple años hoy
-            boolean aplicaCumple = false;
-            SpecialPricingDTO birthdayInfo = getSpecialDayInfo(date, null, groupSize, dto.getEmail());
-            if (birthdayInfo.isSpecialDay() && "BIRTHDAY".equals(birthdayInfo.getDayType()) && birthdayInfo.getDiscountPercentage() > 0 && birthdayDiscountsLeft > 0) {
-                precioConEspecial = precioBase - (precioBase * birthdayInfo.getDiscountPercentage() / 100.0);
+            boolean esCumple = dto.getFechaNacimiento() != null &&
+                dto.getFechaNacimiento().getDayOfMonth() == date.getDayOfMonth() &&
+                dto.getFechaNacimiento().getMonth() == date.getMonth();
+
+            if (esCumple && birthdayDiscountsLeft > 0) {
+                descuentoCumple = precioBase * 0.5;
+                precioAntesDescuentos = precioBase - descuentoCumple;
                 birthdayDiscountsLeft--;
                 aplicaCumple = true;
+            } else if (esCumple) {
+                aplicaCumple = false;
             } else if (specialDayInfo.isSpecialDay() && ("WEEKEND".equals(specialDayInfo.getDayType()) || "HOLIDAY".equals(specialDayInfo.getDayType()))) {
-                precioConEspecial = precioBase * specialDayInfo.getPriceMultiplier();
+                recargoEspecial = precioBase * (specialDayInfo.getPriceMultiplier() - 1.0);
+                precioAntesDescuentos = precioBase + recargoEspecial;
             }
 
-            // 4. Aplica los otros descuentos sobre el precio ajustado
-            double precioConDescuentoGrupo = precioConEspecial - (precioConEspecial * descuentoGrupo / 100.0);
-            double precioConDescuentoTotal = precioConDescuentoGrupo - (precioConDescuentoGrupo * descuentoLoyalty / 100.0);
+            double descuentoGrupoValor = precioAntesDescuentos * (descuentoGrupo / 100.0);
+            double precioTrasGrupo = precioAntesDescuentos - descuentoGrupoValor;
+            double descuentoLoyaltyValor = precioTrasGrupo * (descuentoLoyalty / 100.0);
+            double precioFinal = precioTrasGrupo - descuentoLoyaltyValor;
 
+            System.out.println("------------------------------");
             System.out.println("Participante: " + dto.getNombre() + " (" + dto.getEmail() + ")");
             System.out.println("Visitas: " + visitas);
-            System.out.println("Descuento Loyalty: " + descuentoLoyalty + "%");
-            System.out.println("Descuento Grupo: " + descuentoGrupo + "%");
             System.out.println("Precio base: " + precioBase);
-            System.out.println("Precio con descuento especial: " + precioConEspecial);
-            System.out.println("Precio con descuento de grupo: " + precioConDescuentoGrupo);
-            System.out.println("Precio final con ambos descuentos: " + precioConDescuentoTotal);
+            if (recargoEspecial > 0.0) {
+                System.out.println("Recargo por día especial: +" + recargoEspecial);
+            }
+            if (aplicaCumple) {
+                System.out.println("Descuento cumpleaños: -" + descuentoCumple + " (¡APLICADO!)");
+            } else if (esCumple) {
+                System.out.println("Hoy es su cumpleaños, pero ya se aplicó el máximo de descuentos de cumpleaños para el grupo.");
+            } else {
+                System.out.println("No es su cumpleaños.");
+            }
+            System.out.println("Precio antes de descuentos de grupo y loyalty: " + precioAntesDescuentos);
+            System.out.println("Descuento de grupo: -" + descuentoGrupoValor);
+            System.out.println("Descuento loyalty: -" + descuentoLoyaltyValor);
+            System.out.println("Precio final: " + precioFinal);
+            System.out.println("------------------------------");
 
-            // participante.setPrecioFinal(precioConDescuentoTotal); // Si tienes este campo
+            // Guardar detalle para el comprobante
+            DetalleParticipanteDTO detalle = new DetalleParticipanteDTO();
+            detalle.setNombre(dto.getNombre());
+            detalle.setTarifaBase(precioBase);
+            detalle.setRecargoEspecial(recargoEspecial);
+            detalle.setDescuentoGrupo(descuentoGrupoValor);
+            detalle.setDescuentoLoyalty(descuentoLoyaltyValor);
+            detalle.setDescuentoCumple(descuentoCumple);
+            detalle.setMontoFinalSinIVA(precioAntesDescuentos - descuentoGrupoValor - descuentoLoyaltyValor);
+            double iva = (precioTrasGrupo - descuentoLoyaltyValor) * 0.19;
+            detalle.setIva(iva);
+            detalle.setMontoFinalConIVA((precioTrasGrupo - descuentoLoyaltyValor) + iva);
+            detalleParticipantes.add(detalle);
+
             participantes.add(participante);
         }
         booking.setParticipantes(participantes);
@@ -171,6 +196,34 @@ public class BookingService {
         booking.setAssignedKarts(assignResponse.getAssignedKarts());
         booking = bookingRepository.save(booking);
 
+        // Calcular totales para el comprobante
+        int montoTotalSinIVA = 0;
+        int montoTotalConIVA = 0;
+        int ivaTotal = 0;
+        for (DetalleParticipanteDTO d : detalleParticipantes) {
+            montoTotalSinIVA += (int) Math.round(d.getMontoFinalSinIVA());
+            ivaTotal += (int) Math.round(d.getIva());
+            montoTotalConIVA += (int) Math.round(d.getMontoFinalConIVA());
+        }
+        String nombreResponsable = request.getParticipantes().get(0).getNombre();
+        String detalleParticipantesJson = "";
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            detalleParticipantesJson = mapper.writeValueAsString(detalleParticipantes);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Crear y guardar el Invoice
+        Invoice invoice = invoiceService.generarInvoice(booking, montoTotalSinIVA, ivaTotal, montoTotalConIVA, nombreResponsable, detalleParticipantesJson);
+        // Generar el PDF y actualizar el campo pdfUrl
+        String pdfPath = invoiceService.generarPdfInvoice(invoice, detalleParticipantes);
+        invoice.setPdfUrl(pdfPath);
+        // Guardar el Invoice actualizado (solo update, no crear uno nuevo)
+        invoice = invoiceService.getInvoiceRepository().save(invoice);
+        booking.setInvoice(invoice);
+        booking = bookingRepository.save(booking);
+
         // 7. Mapear a BookingDTO para la respuesta
         BookingDTO bookingDTO = new BookingDTO();
         bookingDTO.setId(booking.getId());
@@ -179,16 +232,28 @@ public class BookingService {
         bookingDTO.setNumVueltas(booking.getNumVueltas());
         bookingDTO.setParticipantes(request.getParticipantes());
         bookingDTO.setKartsAsignados(booking.getAssignedKarts());
+        // Mapear Invoice a DTO
+        InvoiceDTO invoiceDTO = new InvoiceDTO();
+        invoiceDTO.setInvoiceCode(invoice.getInvoiceCode());
+        invoiceDTO.setFechaEmision(invoice.getFechaEmision());
+        invoiceDTO.setMontoTotalSinIVA(invoice.getMontoTotalSinIVA());
+        invoiceDTO.setIvaTotal(invoice.getIvaTotal());
+        invoiceDTO.setMontoTotalConIVA(invoice.getMontoTotalConIVA());
+        invoiceDTO.setPdfUrl(invoice.getPdfUrl());
+        invoiceDTO.setNombreResponsable(invoice.getNombreResponsable());
+        invoiceDTO.setDetalleParticipantes(detalleParticipantes);
+        bookingDTO.setInvoice(invoiceDTO);
 
         return bookingDTO;
     }
 
     // Método para llamar a special-day-service
-    private SpecialPricingDTO getSpecialDayInfo(LocalDate date, Long userId, Integer groupSize, String email) {
-        String url = "http://SPECIAL-DAY-SERVICE/api/special-pricing/info?date=" + date;
+    private SpecialPricingDTO getSpecialDayInfo(LocalDate date, Long userId, Integer groupSize, String email, LocalDate birthDate) {
+        String url = "http://SPECIALDAY-SERVICE/api/special-pricing/info?date=" + date;
         if (userId != null) url += "&userId=" + userId;
         if (groupSize != null) url += "&groupSize=" + groupSize;
         if (email != null) url += "&userId=" + email;
+        if (birthDate != null) url += "&birthDate=" + birthDate;
         return restTemplate.getForObject(url, SpecialPricingDTO.class);
     }
 
@@ -253,5 +318,27 @@ public class BookingService {
     private String generarCodigoReserva() {
         String alfanumerico = UUID.randomUUID().toString().replace("-", "").substring(0, 6).toUpperCase();
         return "RES-" + alfanumerico;
+    }
+
+    public List<BookingDTO> getAllBookings() {
+        List<Booking> bookings = bookingRepository.findAll();
+        List<BookingDTO> dtos = new ArrayList<>();
+        for (Booking booking : bookings) {
+            BookingDTO dto = new BookingDTO();
+            dto.setId(booking.getId());
+            dto.setFechaReserva(booking.getFechaReserva());
+            dto.setStatus(booking.getStatus().name());
+            dto.setNumVueltas(booking.getNumVueltas());
+            // Mapea participantes a BookingParticipantDTO
+            List<BookingParticipantDTO> participantesDTO = booking.getParticipantes().stream()
+                    .map(p -> new BookingParticipantDTO(p.getNombre(), p.getEmail(), p.getFechaNacimiento()))
+                    .collect(Collectors.toList());
+            dto.setParticipantes(participantesDTO);
+            // Mapea karts asignados
+            dto.setKartsAsignados(booking.getAssignedKarts());
+            // Otros campos si los necesitas
+            dtos.add(dto);
+        }
+        return dtos;
     }
 }

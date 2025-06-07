@@ -4,47 +4,27 @@ import axios from 'axios';
 import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
 import './home.css';
+import { ROUTES } from '../apiRoutes';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 const Home = () => {
-  const [stats, setStats] = useState([
-    { title: "Clientes Registrados", value: "0", trend: "up" },
-  ]);
-
   const [recentReservations, setRecentReservations] = useState([]);
   const [loadingReservations, setLoadingReservations] = useState(true);
 
-  // Función para obtener clientes del backend
-  const fetchClientCount = async () => {
-    try {
-      const response = await axios.get('http://localhost:8090/api/client/all');
-      const clientsData = Array.isArray(response.data) ? response.data : [];
-      
-      setStats(prevStats => prevStats.map(stat => 
-        stat.title === "Clientes Registrados" 
-          ? { ...stat, value: clientsData.length.toString() } 
-          : stat
-      ));
-    } catch (err) {
-      console.error("Error al obtener clientes:", err);
-    }
-  };
-
-  // Función para obtener reservas del día actual
-  const fetchTodayReservations = async () => {
+  // Función para obtener todas las reservas
+  const fetchReservations = async () => {
     try {
       setLoadingReservations(true);
-      const today = new Date().toISOString().split('T')[0]; // Formato YYYY-MM-DD
-      const response = await axios.get(`http://localhost:8090/api/bookings/by-date?date=${today}`);
-      
+      const response = await axios.get(`${API_BASE}${ROUTES.BOOKINGS}`);
       // Mapeamos los datos del backend al formato que necesita el frontend
       const formattedReservations = response.data.map(reservation => ({
-        id: reservation.reservationCode,
-        client: reservation.ownerName,
-        kart: reservation.assignedKarts.join(', '),
-        time: `${reservation.startTime.substring(0, 5)} - ${reservation.endTime.substring(0, 5)}`,
-        package: `${reservation.laps} vueltas`
+        id: reservation.id,
+        client: reservation.participantes && reservation.participantes.length > 0 ? reservation.participantes[0].nombre : '',
+        kart: reservation.kartsAsignados ? reservation.kartsAsignados.join(', ') : '',
+        time: reservation.fechaReserva ? new Date(reservation.fechaReserva).toLocaleString() : '',
+        package: `${reservation.numVueltas} vueltas`
       }));
-      
       setRecentReservations(formattedReservations);
     } catch (err) {
       console.error("Error al obtener reservas:", err);
@@ -54,21 +34,18 @@ const Home = () => {
   };
 
   useEffect(() => {
-    fetchClientCount();
-    fetchTodayReservations();
+    fetchReservations();
   }, []);
 
   return (
     <div className="admin-home">
       <Navbar />
-      
       <main className="dashboard-container">
         <header className="dashboard-header">
           <h1>Panel de Control</h1>
           <p>Bienvenido al sistema de gestión de KartingRM</p>
         </header>
-
-                {/* Acciones rápidas */}
+        {/* Acciones rápidas */}
         <section className="quick-actions">
           <h2>Acciones Rápidas</h2>
           <div className="actions-grid">
@@ -90,25 +67,10 @@ const Home = () => {
             </Link>
           </div>
         </section>
-        
-        {/* Estadísticas rápidas */}
-        <section className="stats-grid">
-          {stats.map((stat, index) => (
-            <div key={index} className={`stat-card ${stat.trend}`}>
-              <h3>{stat.title}</h3>
-              <div className="stat-value">{stat.value}</div>
-              <div className="stat-change">
-                {stat.change} {stat.trend === 'up' ? '↑' : '↓'}
-              </div>
-            </div>
-          ))}
-        </section>
-
-        
         {/* Reservas recientes */}
         <section className="recent-section">
           <div className="section-header">
-            <h2>Reservas De Hoy</h2>
+            <h2>Reservas Recientes</h2>
             <Link to="/calendar" className="view-all">Ver todas →</Link>
           </div>
           <div className="reservations-table">
@@ -116,7 +78,7 @@ const Home = () => {
               <span>ID Reserva</span>
               <span>Cliente</span>
               <span>Kart(s)</span>
-              <span>Horario</span>
+              <span>Fecha/Hora</span>
               <span>Paquete</span>
             </div>
             {loadingReservations ? (
@@ -132,14 +94,11 @@ const Home = () => {
                 </div>
               ))
             ) : (
-              <div className="no-reservations">No hay reservas para hoy</div>
+              <div className="no-reservations">No hay reservas registradas</div>
             )}
           </div>
         </section>
-        
-
       </main>
-
       <Footer />
     </div>
   );

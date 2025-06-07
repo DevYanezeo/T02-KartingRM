@@ -9,13 +9,13 @@
         <option value="$PROJECT_DIR$/booking-service/pom.xml" />
         <option value="$PROJECT_DIR$/client-service/pom.xml" />
         <option value="$PROJECT_DIR$/gateway-service/pom.xml" />
-        <option value="$PROJECT_DIR$/group-discount-service/pom.xml" />
         <option value="$PROJECT_DIR$/kart-service/pom.xml" />
         <option value="$PROJECT_DIR$/loyalty-service/pom.xml" />
         <option value="$PROJECT_DIR$/pricing-service/pom.xml" />
         <option value="$PROJECT_DIR$/rack-service/pom.xml" />
         <option value="$PROJECT_DIR$/report-service/pom.xml" />
         <option value="$PROJECT_DIR$/special-day-service/pom.xml" />
+        <option value="$PROJECT_DIR$/group-discount-service/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

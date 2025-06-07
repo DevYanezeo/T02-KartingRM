@@ -9,7 +9,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class SpecialPricingService {
 
-    public SpecialPricingDTO getSpecialDayInfo(LocalDate date, Long userId, Integer groupSize) {
+    public SpecialPricingDTO getSpecialDayInfo(LocalDate date, String userId, Integer groupSize, LocalDate birthDate) {
         SpecialPricingDTO dto = new SpecialPricingDTO();
         if (date == null) date = LocalDate.now();
 
@@ -41,8 +41,10 @@ public class SpecialPricingService {
             return dto;
         }
 
-        // Verificar cumpleaños (solo si se pasan userId y groupSize)
-        if (userId != null && groupSize != null && isUserBirthdayToday(userId)) {
+        // Verificar cumpleaños (solo si se pasan birthDate y groupSize)
+        if (birthDate != null && groupSize != null
+                && birthDate.getDayOfMonth() == date.getDayOfMonth()
+                && birthDate.getMonth() == date.getMonth()) {
             if (groupSize >= 3 && groupSize <= 5) {
                 dto.setSpecialDay(true);
                 dto.setDayType("BIRTHDAY");
@@ -79,7 +81,8 @@ public class SpecialPricingService {
     }
 
     // Método para simular si un usuario cumple años (sin UserService)
-    public boolean isUserBirthdayToday(Long userId) {
-        return userId == 1; // Usuario 1 siempre cumple años (para pruebas)
+    public boolean isUserBirthdayToday(String userId) {
+        // Por ejemplo, para pruebas, puedes poner un email específico:
+        return "eliseo@mail.com".equalsIgnoreCase(userId);
     }
 }

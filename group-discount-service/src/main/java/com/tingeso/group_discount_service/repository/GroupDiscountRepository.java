@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface GroupDiscountRepository extends JpaRepository<GroupDiscount, Long> {
-
-    @Query("SELECT d FROM GroupDiscount d WHERE :groupSize BETWEEN d.minPeople AND d.maxPeople")
-    List<GroupDiscount> findApplicableDiscounts(@Param("groupSize") Integer groupSize);
+    @Query("SELECT g FROM GroupDiscount g WHERE :groupSize BETWEEN g.minPeople AND g.maxPeople")
+    GroupDiscount findApplicableDiscount(@Param("groupSize") Integer groupSize);
 }

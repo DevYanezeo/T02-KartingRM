@@ -4,6 +4,9 @@ import axios from 'axios';
 import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
 import './Karts.css';
+import { ROUTES } from '../apiRoutes';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
 const Karts = () => {
   const [karts, setKarts] = useState([]);
@@ -16,7 +19,7 @@ const Karts = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('http://localhost:8090/api/kart');
+      const response = await axios.get(`${API_BASE}${ROUTES.KARTS}`);
       setKarts(response.data);
     } catch (err) {
       console.error('Error fetching karts:', err);
@@ -29,7 +32,7 @@ const Karts = () => {
 
   const toggleMaintenance = async (kartCode, currentStatus) => {
     try {
-      await axios.put(`http://localhost:8090/api/kart/${kartCode}/maintenance?underMaintenance=${!currentStatus}`);
+      await axios.put(`${API_BASE}${ROUTES.KARTS}/${kartCode}/maintenance?underMaintenance=${!currentStatus}`);
       fetchKarts();
     } catch (err) {
       console.error('Error updating maintenance:', err);

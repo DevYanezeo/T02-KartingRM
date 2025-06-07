@@ -21,7 +21,6 @@ const Navbar = () => {
   const navItems = [
     { path: '/', icon: <FaHome />, text: 'Dashboard' },
     { path: '/calendar', icon: <FaCalendarAlt />, text: 'Reservas' },
-    { path: '/clientes', icon: <FaUsers />, text: 'Clientes' },
     { path: '/karts', icon: <FaCarAlt />, text: 'Flota Karts' },
     { path: '/reportes', icon: <FaChartBar />, text: 'Reportes' },
     { path: '/tarifas', icon: <FaCog />, text: 'Tarifas & Descuentos' },

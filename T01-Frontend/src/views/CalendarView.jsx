@@ -6,6 +6,8 @@ import WeeklyCalendar from '../components/calendar/WeeklyCalendar';
 import CreateBookingButton from './CreateBookingButton';
 import '../components/calendar/calendar.css';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+
 const CalendarView = () => {
   const [calendarData, setCalendarData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,7 +18,7 @@ const CalendarView = () => {
 
   // Configuración de Axios con manejo de errores mejorado
   const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8090/api',
+    baseURL: API_BASE,
     headers: {
       'Content-Type': 'application/json'
     }

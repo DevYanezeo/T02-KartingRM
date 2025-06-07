@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './views/home';  
-import Clients from './views/clients';  
 import Karts from './views/Karts';
 import Tarifas from './views/Tarifas';
 import CalendarView from './views/CalendarView';
@@ -19,7 +18,6 @@ function App() {
         <main className="main-content">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/clientes" element={<Clients />} />
             <Route path="/karts" element={<Karts />} />
             <Route path="/tarifas" element={<Tarifas />} />
             <Route path="/calendar" element={<CalendarView />} />

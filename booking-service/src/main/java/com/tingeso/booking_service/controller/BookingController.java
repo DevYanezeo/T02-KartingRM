@@ -23,4 +23,10 @@ public class BookingController {
         BookingDTO booking = bookingService.createBooking(request);
         return ResponseEntity.ok(booking);
     }
+
+    @GetMapping
+    public ResponseEntity<List<BookingDTO>> getAllBookings() {
+        List<BookingDTO> bookings = bookingService.getAllBookings();
+        return ResponseEntity.ok(bookings);
+    }
 }

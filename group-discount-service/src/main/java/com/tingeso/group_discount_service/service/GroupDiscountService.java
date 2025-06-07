@@ -13,10 +13,8 @@ public class GroupDiscountService {
     private final GroupDiscountRepository repository;
 
     public Integer getDiscountPercentage(Integer groupSize) {
-        return repository.findApplicableDiscounts(groupSize)
-                .stream()
-                .findFirst()
-                .map(GroupDiscount::getPercentage)
-                .orElse(0); // Default si no hay coincidencia
+        GroupDiscount discount = repository.findApplicableDiscount(groupSize);
+        return discount != null ? discount.getPercentage() : 0;
     }
+
 }

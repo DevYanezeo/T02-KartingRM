@@ -1,15 +1,10 @@
 package com.tingeso.booking_service.controller;
 
 
-import com.tingeso.booking_service.dtos.BookingDTO;
-import com.tingeso.booking_service.dtos.BookingRequestDTO;
 import com.tingeso.booking_service.entity.Invoice;
 import com.tingeso.booking_service.repository.InvoiceRepository;
-import com.tingeso.booking_service.service.BookingService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;

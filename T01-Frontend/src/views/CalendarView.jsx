@@ -1,284 +1,234 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
-import WeeklyCalendar from '../components/calendar/WeeklyCalendar';
-import CreateBookingButton from './CreateBookingButton';
+import { FaCalendarAlt, FaChevronLeft, FaChevronRight, FaClock } from 'react-icons/fa';
 import '../components/calendar/calendar.css';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const HOURS = Array.from({ length: 13 }, (_, i) => 10 + i); // 10 a 22
+const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+const MINUTES_PER_SLOT = 15;
+const SLOTS_PER_HOUR = 4;
+
+function getMonday(d) {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Ajuste para que la semana empiece en lunes
+  return new Date(date.setDate(diff));
+}
+
+function formatDate(date) {
+  return date.toISOString().split('T')[0];
+}
+
+function formatDisplayDate(date) {
+  const options = { day: 'numeric', month: 'long' };
+  return new Date(date).toLocaleDateString('es-ES', options);
+}
+
+function parseTime(timeStr) {
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return hours * 60 + minutes;
+}
+
+function calculatePosition(startTime) {
+  const totalMinutes = parseTime(startTime);
+  const startOfDay = 10 * 60; // 10:00 AM en minutos
+  const minutesFromStart = totalMinutes - startOfDay;
+  return minutesFromStart;
+}
+
+function calculateDuration(startTime, endTime) {
+  const start = parseTime(startTime);
+  const end = parseTime(endTime);
+  return end - start;
+}
+
+// Función para generar un color basado en el código de reserva
+function generateBookingColor(bookingCode) {
+  let hash = 0;
+  for (let i = 0; i < bookingCode.length; i++) {
+    hash = bookingCode.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = hash % 360;
+  return `hsl(${hue}, 70%, 35%)`; // Saturación y luminosidad fijas para asegurar contraste
+}
 
 const CalendarView = () => {
-  const [calendarData, setCalendarData] = useState(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [weekDates, setWeekDates] = useState([]);
+  const [rackData, setRackData] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [currentWeek, setCurrentWeek] = useState(new Date());
-  const [selectedCell, setSelectedCell] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Configuración de Axios con manejo de errores mejorado
-  const api = axios.create({
-    baseURL: API_BASE,
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
 
   useEffect(() => {
-    const fetchCalendarData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Obtener la fecha de inicio de la semana (domingo)
-        const startDate = getStartOfWeek(currentWeek);
-        const formattedStartDate = formatDate(startDate);
-        
-        console.log("Fetching data for:", formattedStartDate);
-        
-        // Simular la respuesta si estamos en desarrollo o hacer la petición real
-        let response;
-        if (process.env.NODE_ENV === 'development' && import.meta.env.VITE_USE_MOCK_DATA === 'true') {
-          // Usar datos de ejemplo (puedes crear un archivo mock)
-          response = { data: getMockCalendarData(startDate) };
-        } else {
-          // Petición real al backend
-          response = await api.get('/calendar/weekly', {
-            params: { startDate: formattedStartDate }
-          });
-        }
-        
-        if (!response.data || !response.data.calendarGrid) {
-          throw new Error("Datos del calendario no recibidos correctamente");
-        }
-        
-        console.log("Datos recibidos:", response.data);
-        setCalendarData(response.data);
-      } catch (err) {
-        console.error("Error completo:", {
-          message: err.message,
-          config: err.config,
-          response: err.response?.data
-        });
-        setError(err.response?.data?.message || err.message || "Error al cargar el calendario");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCalendarData();
-  }, [currentWeek]);
-
-  // Función para obtener el inicio de la semana (domingo)
-  const getStartOfWeek = (date) => {
-    const d = new Date(date);
-    const day = d.getDay(); // 0 = domingo, 1 = lunes, etc.
-    d.setDate(d.getDate() - day); // Restamos los días para llegar al domingo
-    return d;
-  };
-
-  // Función para formatear la fecha en formato YYYY-MM-DD
-  const formatDate = (date) => {
-    return date.toISOString().split('T')[0];
-  };
-
-  const handleWeekChange = (weeksOffset) => {
-    const newDate = new Date(currentWeek);
-    newDate.setDate(newDate.getDate() + (weeksOffset * 7));
-    setCurrentWeek(newDate);
-  };
-
-  const handleCellClick = (cellData, dateStr, timeStr) => {
-    setSelectedCell({
-      ...cellData,
-      date: dateStr,
-      formattedTime: timeStr
+    const monday = getMonday(currentDate);
+    const dates = Array.from({ length: 7 }, (_, i) => {
+      const date = new Date(monday);
+      date.setDate(monday.getDate() + i);
+      return formatDate(date);
     });
-    setIsModalOpen(true);
-  };
+    setWeekDates(dates);
+    fetchRackData(dates);
+  }, [currentDate]);
 
-  const handleSaveBooking = async (bookingData) => {
+  const fetchRackData = async (dates) => {
+    setLoading(true);
     try {
-      // Aquí iría la lógica para guardar la reserva en el backend
-      console.log("Guardando reserva:", bookingData);
-      
-      // Ejemplo:
-      // await api.post('/bookings', bookingData);
-      
-      // Recargar los datos del calendario después de guardar
-      const startDate = getStartOfWeek(currentWeek);
-      const formattedStartDate = formatDate(startDate);
-      const response = await api.get('/calendar/weekly', {
-        params: { startDate: formattedStartDate }
+      const promises = dates.map(date =>
+        axios.get(`${API_BASE}/api/rack/by-date?date=${date}`)
+      );
+      const responses = await Promise.all(promises);
+      const newData = {};
+      dates.forEach((date, index) => {
+        newData[date] = responses[index].data;
       });
-      
-      setCalendarData(response.data);
-      
-      // Feedback al usuario
-      alert("Reserva guardada con éxito");
-    } catch (err) {
-      console.error("Error al guardar la reserva:", err);
-      alert("Error al guardar la reserva: " + (err.response?.data?.message || err.message));
-    }
-  };
-
-  // Función para generar datos de ejemplo (solo para desarrollo)
-  const getMockCalendarData = (startDate) => {
-    // Crear una copia profunda de los datos de ejemplo para no modificar el original
-    const mockData = JSON.parse(JSON.stringify({
-      startDate: formatDate(startDate),
-      endDate: formatDate(new Date(startDate.getTime() + 6 * 24 * 60 * 60 * 1000)),
-      daysHeader: generateDaysHeader(startDate),
-      timeSlots: generateTimeSlots(),
-      calendarGrid: generateCalendarGrid(startDate)
-    }));
-    
-    return mockData;
-  };
-
-  // Generar los encabezados de los días correctamente
-  const generateDaysHeader = (startDate) => {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const headers = [];
-    
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startDate);
-      date.setDate(date.getDate() + i);
-      const dayName = days[date.getDay()];
-      const dayNumber = date.getDate();
-      headers.push(`${dayName} ${dayNumber}`);
-    }
-    
-    return headers;
-  };
-
-  // Generar franjas horarias de ejemplo
-  const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 9; hour < 23; hour++) {
-      slots.push(`${hour.toString().padStart(2, '0')}:00:00`);
-      slots.push(`${hour.toString().padStart(2, '0')}:30:00`);
-    }
-    return slots;
-  };
-
-  // Generar grid del calendario
-  const generateCalendarGrid = (startDate) => {
-    const grid = {};
-    const timeSlots = generateTimeSlots();
-    
-    // Para cada franja horaria
-    timeSlots.forEach(slot => {
-      const timeKey = slot.substring(0, 5);
-      grid[timeKey] = {};
-      
-      // Para cada día de la semana
-      for (let i = 0; i < 7; i++) {
-        const date = new Date(startDate);
-        date.setDate(date.getDate() + i);
-        const dateKey = formatDate(date);
-        
-        // La mayoría serán disponibles
-        grid[timeKey][dateKey] = [{
-          bookingId: null,
-          reservationCode: null,
-          clientName: null,
-          startTime: slot,
-          endTime: addMinutesToTime(slot, 30),
-          assignedKarts: null,
-          status: "AVAILABLE",
-          pricingInfo: null
-        }];
-        
-      }
-    });
-    
-    return grid;
-  };
-
-  const addMinutesToTime = (timeStr, minutes) => {
-    const [hours, mins, secs] = timeStr.split(':').map(Number);
-    const totalMinutes = hours * 60 + mins + minutes;
-    const newHours = Math.floor(totalMinutes / 60) % 24;
-    const newMins = totalMinutes % 60;
-    return `${String(newHours).padStart(2, '0')}:${String(newMins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  };
-
-  const refreshCalendarData = async () => {
-    try {
-      setLoading(true);
-      const startDate = getStartOfWeek(currentWeek);
-      const formattedStartDate = formatDate(startDate);
-      const response = await api.get('/calendar/weekly', {
-        params: { startDate: formattedStartDate }
-      });
-      setCalendarData(response.data);
-    } catch (err) {
-      console.error("Error al recargar el calendario:", err);
-      setError(err.response?.data?.message || err.message || "Error al recargar el calendario");
+      setRackData(newData);
+    } catch (error) {
+      console.error('Error fetching rack data:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gray-50">
-        <Navbar />
-        <div className="flex-grow container mx-auto px-4 py-8">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="animate-pulse space-y-6">
-              <div className="h-10 bg-gray-200 rounded-md w-1/3 mx-auto"></div>
-              <div className="flex justify-between">
-                <div className="h-8 bg-gray-200 rounded-md w-28"></div>
-                <div className="h-8 bg-gray-200 rounded-md w-40"></div>
-                <div className="h-8 bg-gray-200 rounded-md w-28"></div>
-              </div>
-              <div className="h-80 bg-gray-200 rounded-md w-full"></div>
+  const navigateWeek = (direction) => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(currentDate.getDate() + (direction * 7));
+    setCurrentDate(newDate);
+  };
+
+  // Renderizar slots de 15 minutos
+  const renderTimeSlots = (hour) => {
+    return Array.from({ length: SLOTS_PER_HOUR }, (_, index) => {
+      const minutes = index * MINUTES_PER_SLOT;
+      return (
+        <div key={`${hour}-${minutes}`} className="quarter-hour-slot">
+          {minutes === 0 && (
+            <div className="hour-label">
+              <FaClock className="clock-icon" />
+              {hour}:00
             </div>
+          )}
+        </div>
+      );
+    });
+  };
+
+  // Renderizar bloques de reserva
+  const renderBlocks = (date, hour) => {
+    const blocks = rackData[date] || [];
+    const hourStart = `${hour}:00`;
+    const hourEnd = `${hour + 1}:00`;
+    
+    // Filtrar bloques que intersectan con esta hora
+    const relevantBlocks = blocks.filter(block => {
+      const blockStart = parseTime(block.horaInicio);
+      const blockEnd = parseTime(block.horaFin);
+      const slotStart = parseTime(hourStart);
+      const slotEnd = parseTime(hourEnd);
+      return blockStart < slotEnd && blockEnd > slotStart;
+    });
+
+    return relevantBlocks.map(block => {
+      const startMinutes = calculatePosition(block.horaInicio);
+      const duration = calculateDuration(block.horaInicio, block.horaFin);
+      const backgroundColor = generateBookingColor(block.bookingCode);
+      const style = {
+        top: `${(startMinutes % 60) * (100 / 60)}%`,
+        height: `${duration * (100 / 60)}%`,
+        position: 'absolute',
+        width: '95%',
+        left: '2.5%',
+        backgroundColor
+      };
+
+      const kartsText = block.kartsAsignados ? block.kartsAsignados.join(' ') : '';
+
+      return (
+        <div
+          key={block.bookingCode}
+          className={`rack-block occupied duration-${duration}`}
+          style={style}
+          title={`${block.bookingCode}\n${block.horaInicio} - ${block.horaFin}\n${kartsText}`}
+        >
+          <div className="booking-info">
+            <div className="booking-code">{block.bookingCode}</div>
+            <div className="booking-time">{block.horaInicio} - {block.horaFin}</div>
+            {block.kartsAsignados && block.kartsAsignados.length > 0 && (
+              <div className="karts-text">{kartsText}</div>
+            )}
           </div>
         </div>
-        <Footer />
-      </div>
-    );
-  }
+      );
+    });
+  };
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex flex-col bg-gray-50">
-        <Navbar />
-        <div className="flex-grow container mx-auto px-4 py-8">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
-              <h3 className="font-bold">Error al cargar el calendario</h3>
-              <p>{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                Reintentar
+  return (
+    <div className="page-container">
+      <Navbar />
+      <div className="content-wrapper">
+        <div className="calendar-container">
+          <div className="calendar-header">
+            <div className="calendar-title">
+              <FaCalendarAlt />
+              Calendario de Reservas
+            </div>
+            <div className="calendar-navigation">
+              <button className="nav-button" onClick={() => navigateWeek(-1)}>
+                <FaChevronLeft /> Semana Anterior
+              </button>
+              <button className="nav-button" onClick={() => navigateWeek(1)}>
+                Siguiente Semana <FaChevronRight />
               </button>
             </div>
           </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
-  return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
-      <Navbar />
-      <CreateBookingButton onBookingCreated={refreshCalendarData} />
-      <main className="flex-grow container mx-auto px-4 py-8">
-        {calendarData && (
-          <WeeklyCalendar 
-            data={calendarData} 
-            onWeekChange={handleWeekChange}
-            onCellClick={handleCellClick}
-          />
-        )}
-      </main>
+          <div className="calendar-grid-container">
+            <div className="calendar-grid">
+              <div className="time-column">
+                <div className="time-header">Hora</div>
+                {HOURS.map(hour => (
+                  <div key={hour} className="hour-cell">
+                    {renderTimeSlots(hour)}
+                  </div>
+                ))}
+              </div>
+
+              <div className="days-grid">
+                <div className="days-header">
+                  {DAYS.map((day, index) => (
+                    <div key={day} className="day-column-header">
+                      <div className="day-name">{day}</div>
+                      <div className="day-date">{formatDisplayDate(weekDates[index])}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="time-slots">
+                  {HOURS.map(hour => (
+                    <div key={hour} className="hour-row">
+                      {weekDates.map(date => (
+                        <div key={`${date}-${hour}`} className="time-slot">
+                          <div className="quarter-hour-grid">
+                            {renderTimeSlots(hour)}
+                          </div>
+                          {renderBlocks(date, hour)}
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+          {loading && (
+            <div className="loading-overlay">
+              <div className="loading-spinner"></div>
+              <div className="loading-text">Cargando datos del rack...</div>
+            </div>
+          )}
+        </div>
+      </div>
       <Footer />
     </div>
   );

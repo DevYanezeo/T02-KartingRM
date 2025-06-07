@@ -214,10 +214,6 @@ main.flex-grow {
   height: calc(var(--base-minute-height) * 120);
 }
 
-
-
-
-
 /* Añadir al final del archivo CSS existente */
 
 /* Mejoras para celdas que exceden la hora */
@@ -278,7 +274,6 @@ main.flex-grow {
 .booking-position-wrapper:hover {
   z-index: 25;
 }
-
 
 /* Estilos adicionales para mejorar la visualización de reservas */
 
@@ -365,11 +360,6 @@ main.flex-grow {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-
-
-
-
-
 /* Celdas Reservadas */
 .booked-cell {
   height: 100%;
@@ -425,32 +415,32 @@ main.flex-grow {
 .booking-info {
   display: flex;
   flex-direction: column;
-  height: 100%;
-  overflow: hidden;
+  gap: 2px;
 }
 
 .booking-time {
-  font-weight: bold;
-  font-size: 0.8rem;
-  background-color: rgba(0, 0, 0, 0.1);
-  padding: 2px 4px;
-  border-radius: 2px;
-  display: inline-block;
-  margin-bottom: 3px;
-  align-self: flex-start;
+  font-size: 0.75rem;
+  opacity: 0.9;
+  white-space: nowrap;
 }
 
-.client-name {
-  font-weight: 600;
+.booking-code {
+  font-weight: bold;
   font-size: 0.9rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.reservation-code {
+.karts-text {
   font-size: 0.75rem;
   opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 4px;
+  border-radius: 3px;
   margin-top: 2px;
 }
 
@@ -481,7 +471,7 @@ main.flex-grow {
 
 /* Encabezado del Calendario */
 .calendar-header {
-  background-color: var(--primary);
+  background-color: var(--bg-light);
   color: var(--text-light);
   padding: 1.5rem;
   border-radius: 0.5rem 0.5rem 0 0;
@@ -490,12 +480,14 @@ main.flex-grow {
   gap: 0.75rem;
   margin-bottom: 0;
   border-bottom: none;
+  top: 0;
 }
 
 .calendar-title {
   font-size: 1.5rem;
   font-weight: 700;
   margin: 0;
+  color: var(--primary-dark);
 }
 
 .calendar-nav {
@@ -507,7 +499,7 @@ main.flex-grow {
 
 .nav-button {
   background-color: var(--secondary);
-  color: var(--text-light);
+  color: var(--primary-dark);
   border: none;
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
@@ -646,4 +638,344 @@ main.flex-grow {
   .calendar-table .time-column {
     min-width: 50px;
   }
+}
+
+/* Estructura de página */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content-wrapper {
+  flex: 1;
+  padding: 2rem;
+  background-color: var(--bg-light);
+}
+
+.calendar-container {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+  position: relative;
+  height: calc(100vh - 180px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header del calendario */
+.calendar-header-section {
+  padding: 1.5rem;
+  background: white;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.calendar-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.calendar-icon {
+  font-size: 1.8rem;
+  color: var(--primary);
+}
+
+.calendar-title h1 {
+  font-size: 1.8rem;
+  color: var(--primary);
+  margin: 0;
+}
+
+.current-week-badge {
+  background: var(--success);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.85rem;
+  margin-left: 1rem;
+}
+
+.week-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.nav-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--secondary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.nav-button:hover {
+  background: var(--secondary-light);
+}
+
+.week-info {
+  text-align: center;
+}
+
+.week-dates {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.week-year {
+  font-size: 0.9rem;
+  color: var(--primary);
+  opacity: 0.8;
+}
+
+/* Estructura de la grilla */
+.calendar-grid-container {
+  overflow-y: auto;
+  overflow-x: auto;
+  position: relative;
+  flex-grow: 1;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) #f0f0f0;
+}
+
+.calendar-grid-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.calendar-grid-container::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.calendar-grid-container::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 4px;
+}
+
+.calendar-grid {
+  display: flex;
+  min-width: 1000px;
+}
+
+.time-column {
+  width: 80px;
+  flex-shrink: 0;
+  border-right: 1px solid #e0e0e0;
+  position: sticky;
+  left: 0;
+  background: white;
+  z-index: 2;
+}
+
+.time-header {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  background-color: var(--primary);
+  color: white;
+  border-top-left-radius: 6px;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.hour-cell {
+  height: 180px; /* Reducido de 240px */
+  border-bottom: 1px solid #e0e0e0;
+  position: relative;
+}
+
+.quarter-hour-slot {
+  height: 45px; /* Reducido de 60px */
+  border-bottom: 1px dashed #f0f0f0;
+  position: relative;
+}
+
+.hour-label {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.85rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.clock-icon {
+  font-size: 0.75rem;
+}
+
+.days-grid {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.days-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  height: 50px;
+  background-color: var(--primary);
+  color: white;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.day-column-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.day-name {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.day-date {
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+.time-slots {
+  flex-grow: 1;
+}
+
+.hour-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  height: 180px; /* Reducido de 240px */
+}
+
+.time-slot {
+  border-left: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  position: relative;
+  height: 100%;
+}
+
+.quarter-hour-grid {
+  height: 100%;
+  position: relative;
+}
+
+.rack-block {
+  color: white;
+  padding: 6px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  cursor: pointer;
+  z-index: 1;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.rack-block:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+  overflow: visible;
+}
+
+.rack-block.occupied {
+  background-color: var(--accent-color);
+}
+
+.karts-assigned {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px; /* Reducido de 4px */
+  margin-top: 2px; /* Reducido de 4px */
+}
+
+.kart-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 1px 4px; /* Reducido de 2px 6px */
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--primary);
+  border-radius: 50%;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+.loading-text {
+  margin-top: 10px;
+  color: var(--primary);
+  font-weight: bold;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Estilos responsivos */
+@media (max-width: 1200px) {
+  .calendar-container {
+    margin: 10px;
+    padding: 10px;
+  }
+}
+
+/* Estilos para diferentes duraciones */
+.duration-15 {
+  min-height: 30px;
+}
+
+.duration-30 {
+  min-height: 45px;
+}
+
+.duration-35 {
+  min-height: 50px;
+}
+
+.duration-40 {
+  min-height: 55px;
+}
+
+.duration-45 {
+  min-height: 60px;
 }

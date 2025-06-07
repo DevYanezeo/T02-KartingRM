@@ -8,24 +8,24 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="eureka-service" />
-        <module name="rack-service" />
-        <module name="loyalty-service" />
         <module name="config-service" />
         <module name="gateway-service" />
-        <module name="booking-service" />
-        <module name="kart-service" />
-        <module name="report-service" />
-        <module name="special-day-service" />
-        <module name="pricing-service" />
       </profile>
-      <profile name="Annotation profile for group-discount-service" enabled="true">
+      <profile name="Annotation profile for special-day-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
+        <module name="rack-service" />
+        <module name="loyalty-service" />
         <module name="group-discount-service" />
+        <module name="kart-service" />
+        <module name="booking-service" />
+        <module name="report-service" />
+        <module name="special-day-service" />
+        <module name="pricing-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>

@@ -1,4 +1,4 @@
-package com.tingeso.booking_service.dtos;
+package com.tingeso.report_service.dtos;
 
 import lombok.*;
 import java.time.LocalDateTime;
@@ -17,4 +17,4 @@ public class InvoiceDTO {
     private String pdfUrl;
     private String nombreResponsable;
     private List<DetalleParticipanteDTO> detalleParticipantes;
-}
+} 

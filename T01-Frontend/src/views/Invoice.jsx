@@ -5,7 +5,7 @@ import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
 import { FaFileInvoice, FaSearch, FaFileDownload, FaSync, FaCalendarAlt } from 'react-icons/fa';
 import './Invoice.css';
-import { ROUTES } from '../apiRoutes';
+import { ROUTES, getInvoiceDownloadUrl } from '../apiRoutes';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 
@@ -45,8 +45,15 @@ const Invoices = () => {
 
   // Descargar boleta PDF
   const downloadInvoice = async (id) => {
+    console.log('Intentando descargar boleta con id:', id); // Depuración
+    if (!id) {
+      setError('No se puede descargar la boleta: ID inválido.');
+      return;
+    }
     try {
-      const response = await axios.get(`${API_BASE}${ROUTES.INVOICES}/${id}/download`, {
+      // Usar función utilitaria para construir la URL de descarga
+      const downloadUrl = getInvoiceDownloadUrl(id);
+      const response = await axios.get(downloadUrl, {
         responseType: 'blob'
       });
       // Crear URL para el blob
@@ -140,6 +147,7 @@ const Invoices = () => {
                         className="download-btn"
                         onClick={() => downloadInvoice(invoice.id)}
                         title="Descargar boleta"
+                        disabled={!invoice.id}
                       >
                         <FaFileDownload /> Descargar
                       </button>

@@ -45,6 +45,7 @@ spring:
           uri: lb://BOOKING-SERVICE
           predicates:
             - Path=/api/bookings/**
+            - Path=/api/invoices/**
           filters:
         - id: kart_service
           uri: lb://KART-SERVICE
@@ -55,11 +56,6 @@ spring:
           uri: lb://RACK-SERVICE
           predicates:
             - Path=/api/rack/**
-          filters:
-        - id: invoice_service
-          uri: lb://INVOICE-SERVICE
-          predicates:
-            - Path=/api/invoices/**
           filters:
 
 management:

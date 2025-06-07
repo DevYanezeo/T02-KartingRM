@@ -56,7 +56,11 @@ spring:
           predicates:
             - Path=/api/rack/**
           filters:
-
+        - id: report_service
+          uri: lb://REPORT-SERVICE
+          predicates:
+            - Path=/api/reports/**
+          filters:
 management:
   endpoints:
     web:

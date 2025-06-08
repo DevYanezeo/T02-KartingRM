@@ -7,8 +7,7 @@ import { FaFileInvoice, FaSearch, FaFileDownload, FaSync, FaCalendarAlt } from '
 import './Invoice.css';
 import { ROUTES, getInvoiceDownloadUrl } from '../apiRoutes';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-
+const API_BASE = window.API_URL || 'http://localhost:8080';
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);

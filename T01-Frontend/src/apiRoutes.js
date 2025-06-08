@@ -12,6 +12,6 @@ export const ROUTES = {
 
 // Devuelve la URL completa para descargar el PDF de una boleta dado su id
 export const getInvoiceDownloadUrl = (id) => {
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+  const API_BASE = window.API_URL || 'http://localhost:8080';
   return `${API_BASE}/api/bookings/invoices/${id}/download`;
-}; 
+};

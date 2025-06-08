@@ -6,8 +6,7 @@ import { FaUserPlus, FaTrash, FaCalendarAlt, FaClock, FaCheck } from 'react-icon
 import './Reservas.css';
 import { ROUTES } from '../apiRoutes';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-
+const API_BASE = window.API_URL || 'http://localhost:8080';
 const Reservas = () => {
   const [fechaUso, setFechaUso] = useState('');
   const [horaUso, setHoraUso] = useState('');

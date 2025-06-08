@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: group-discount-service-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: group-discount-service
+  template:
+    metadata:
+      labels:
+        app: group-discount-service
+    spec:
+      containers:
+        - name: group-discount-service
+          image: elynnz/group-discount-service:latest
+          ports:
+            - containerPort: 8088
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config-map
+                  key: POSTGRES_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config-map
+                  key: POSTGRES_PORT
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config-map
+                  key: GROUP_DISCOUNT_DB_NAME
+            - name: DB_USER
+              value: postgres
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: SERVER_PORT
+              value: "8088"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
+            - name: SPRING_CONFIG_IMPORT
+              value: "configserver:http://config-service:8081"
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: "http://eureka-service:8761/eureka"

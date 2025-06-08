@@ -12,7 +12,7 @@ eureka:
     enabled: true
     path: /
   instance:
-    hostname: localhost
+    hostname: eureka-service
   client:
     registerWithEureka: false  # Este servicio no debe registrarse a sí mismo
     fetchRegistry: false       # No necesita obtener el registro de otros servicios

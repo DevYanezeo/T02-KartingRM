@@ -5,7 +5,7 @@ import Footer from '../components/common/Footer';
 import { FaCalendarAlt, FaChevronLeft, FaChevronRight, FaClock } from 'react-icons/fa';
 import '../components/calendar/calendar.css';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const API_BASE = window.API_URL || 'http://localhost:8080';
 const HOURS = Array.from({ length: 13 }, (_, i) => 10 + i); // 10 a 22
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const MINUTES_PER_SLOT = 15;

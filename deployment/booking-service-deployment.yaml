@@ -6,48 +6,45 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: booking-service-deployment
+      app: booking-service
   template:
     metadata:
       labels:
-        app: booking-service-deployment
+        app: booking-service
     spec:
       containers:
         - name: booking-service
           image: elynnz/booking-service:latest
           ports:
-            - containerPort: 8082  
+            - containerPort: 8089
           env:
-            - name: SPRING_CLOUD_CONFIG_URI
-              value: http://config-service:8081
-            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
-              value: http://eureka-service:8761/eureka
-            - name: EUREKA_INSTANCE_PREFERIPADDRESS
-              value: "true"
-            - name: SERVER_PORT
-              value: "8082" 
             - name: DB_HOST
               valueFrom:
                 configMapKeyRef:
                   name: postgres-config-map
-                  key: DB_HOST_BOOKING
+                  key: POSTGRES_HOST
             - name: DB_PORT
               valueFrom:
                 configMapKeyRef:
                   name: postgres-config-map
-                  key: DB_PORT
+                  key: POSTGRES_PORT
             - name: DB_NAME
               valueFrom:
                 configMapKeyRef:
                   name: postgres-config-map
-                  key: DB_NAME
+                  key: BOOKING_DB_NAME
             - name: DB_USER
-              valueFrom:
-                secretKeyRef:
-                  name: postgres-credentials
-                  key: DB_USER
+              value: postgres
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres-credentials
-                  key: DB_PASSWORD
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: SERVER_PORT
+              value: "8089"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
+            - name: SPRING_CONFIG_IMPORT
+              value: "configserver:http://config-service:8081"
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: "http://eureka-service:8761/eureka"

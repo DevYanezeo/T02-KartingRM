@@ -6,8 +6,7 @@ import Footer from '../components/common/Footer';
 import './Tarifas.css';
 import { ROUTES } from '../apiRoutes';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-
+const API_BASE = window.API_URL || 'http://localhost:8080';
 const Tarifas = () => {
   // Estados para tarifas
   const [pricings, setPricings] = useState([]);

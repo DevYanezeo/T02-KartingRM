@@ -47,4 +47,4 @@ spec:
             - name: SPRING_CONFIG_IMPORT
               value: "configserver:http://config-service:8081"
             - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
-              value: "http://eureka-server:8761/eureka"
+              value: "http://eureka-service:8761/eureka"

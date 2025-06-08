@@ -16,7 +16,7 @@ const CreateBookingButton = ({ onBookingCreated }) => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+  const API_BASE = window.API_URL || 'http://localhost:8080';
   const api = axios.create({
     baseURL: API_BASE,
     headers: {

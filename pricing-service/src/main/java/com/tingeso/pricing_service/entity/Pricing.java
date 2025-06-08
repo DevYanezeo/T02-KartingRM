@@ -22,5 +22,4 @@ public class Pricing {
     @Column(nullable = false)
     private Integer totalDuration;  // Duración en minutos (ej: 30)
 
-    // Eliminamos la relación con Booking (ahora es otro microservicio)
 }

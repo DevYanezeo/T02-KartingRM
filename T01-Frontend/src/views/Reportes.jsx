@@ -6,8 +6,7 @@ import { ROUTES } from '../apiRoutes';
 import { FaChartBar, FaCalendarAlt, FaSearch, FaSpinner, FaUsers, FaRoute } from 'react-icons/fa';
 import './Reportes.css';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080';
-
+const API_BASE = window.API_URL || 'http://localhost:8080';
 const Reportes = () => {
   const [desde, setDesde] = useState('2024-01-01T00:00:00');
   const [hasta, setHasta] = useState('2024-12-31T23:59:59');

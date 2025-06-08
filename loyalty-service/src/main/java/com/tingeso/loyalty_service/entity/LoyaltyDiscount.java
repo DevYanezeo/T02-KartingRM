@@ -1,11 +1,13 @@
 package com.tingeso.loyalty_service.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
 @Data
 @Table(name = "loyalty_discounts")
+@AllArgsConstructor
+@NoArgsConstructor
 public class LoyaltyDiscount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

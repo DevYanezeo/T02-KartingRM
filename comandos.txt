@@ -73,6 +73,14 @@ kubectl delete -f eureka-server-deployment-service.yaml
 kubectl delete -f gateway-server-deplyment-service.yaml
 kubectl delete -f booking-service-deployment.yaml
 kubectl delete -f kart-service-deployment.yaml
+kubectl delete -f pricing-service-deployment.yaml
+kubectl delete -f report-service-deployment.yaml
+kubectl delete -f rack-service-deployment.yaml
+kubectl delete -f specialday-service-deployment.yaml
+kubectl delete -f group-discount-service-deployment.yaml
+kubectl delete -f loyalty-service-deployment.yaml
+kubectl delete -f frontend-configmap.yaml
+kubectl delete -f frontend-deployment.yaml
 
 
 
@@ -80,14 +88,14 @@ kubectl delete -f kart-service-deployment.yaml
 <!-- Deployment -->
 <!-- DB init-->
 //recursos de PostgreSQL 
-kubectl apply -f postgres-config-map.yaml 
 kubectl apply -f postgres-secret.yaml
+kubectl apply -f postgres-config-map.yaml
 kubectl apply -f postgres-pvc.yaml
 kubectl apply -f postgres-deployment.yaml
-kubectl apply -f postgres-service.yaml  
+kubectl apply -f postgres-service.yaml
 
 kubectl get pods
-kubectl exec -it postgres-5869977ff4-4npqp -- psql -U postgres
+kubectl exec -it postgres-5869977ff4-hck8w -- psql -U postgres
 
 <!-- Crear las bases de datos -->
 CREATE DATABASE booking_db;
@@ -112,6 +120,10 @@ kubectl apply -f rack-service-deployment.yaml
 kubectl apply -f specialday-service-deployment.yaml
 kubectl apply -f group-discount-service-deployment.yaml
 kubectl apply -f loyalty-service-deployment.yaml
+
+kubectl apply -f frontend-configmap.yaml
+kubectl apply -f frontend-deployment.yaml
+
 
 
 

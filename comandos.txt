@@ -1,0 +1,122 @@
+<!-- Backend -->
+cd Backend
+
+cd booking-service
+docker build -t elynnz/booking-service .
+docker push elynnz/booking-service 
+cd ..
+
+cd config-service
+docker build -t elynnz/config-service .
+docker push elynnz/config-service 
+cd ..
+
+cd eureka-service
+docker build -t elynnz/eureka-service .
+docker push elynnz/eureka-service 
+cd ..
+
+cd gateway-service
+docker build -t elynnz/gateway-service .
+docker push elynnz/gateway-service 
+cd ..
+
+cd group-discount-service
+docker build -t elynnz/group-discount-service .
+docker push elynnz/group-discount-service
+cd ..
+
+cd kart-service
+docker build -t elynnz/kart-service .
+docker push elynnz/kart-service 
+cd ..
+
+cd loyalty-service
+docker build -t elynnz/loyalty-service .
+docker push elynnz/loyalty-service 
+cd ..
+
+cd pricing-service
+docker build -t elynnz/pricing-service .
+docker push elynnz/pricing-service 
+cd ..
+
+cd rack-service
+docker build -t elynnz/rack-service .
+docker push elynnz/rack-service 
+cd ..
+
+cd report-service
+docker build -t elynnz/report-service .
+docker push elynnz/report-service 
+cd ..
+
+cd special-day-service
+docker build -t elynnz/special-day-service .
+docker push elynnz/special-day-service
+cd ..
+
+<!-- Frontend -->
+cd T01-Frontend
+docker build -t elynnz/frontend . 
+docker push elynnz/frontend
+cd ..
+
+<!-- Kubernetes -->
+
+
+<!-- DB delete -->
+
+<!-- Deployment delete -->
+kubectl delete -f config-server-deployment-service.yaml
+kubectl delete -f eureka-server-deployment-service.yaml
+kubectl delete -f gateway-server-deplyment-service.yaml
+kubectl delete -f booking-service-deployment.yaml
+kubectl delete -f kart-service-deployment.yaml
+
+
+
+
+<!-- Deployment -->
+<!-- DB init-->
+//recursos de PostgreSQL 
+kubectl apply -f postgres-config-map.yaml 
+kubectl apply -f postgres-secret.yaml
+kubectl apply -f postgres-pvc.yaml
+kubectl apply -f postgres-deployment.yaml
+kubectl apply -f postgres-service.yaml  
+
+kubectl get pods
+kubectl exec -it postgres-5869977ff4-4npqp -- psql -U postgres
+
+<!-- Crear las bases de datos -->
+CREATE DATABASE booking_db;
+CREATE DATABASE group_discount_db;
+CREATE DATABASE kart_db;
+CREATE DATABASE loyalty_db;
+CREATE DATABASE pricing_db; 
+CREATE DATABASE rack_db; 
+CREATE DATABASE specialday_db; 
+<!-- Listar las bases de datos -->
+\l
+
+<!-- Deploy microservices -->
+kubectl apply -f config-server-deployment-service.yaml
+kubectl apply -f eureka-server-deployment-service.yaml
+kubectl apply -f gateway-server-deplyment-service.yaml
+kubectl apply -f booking-service-deployment.yaml
+kubectl apply -f kart-service-deployment.yaml
+kubectl apply -f pricing-service-deployment.yaml
+kubectl apply -f report-service-deployment.yaml
+kubectl apply -f rack-service-deployment.yaml
+kubectl apply -f specialday-service-deployment.yaml
+kubectl apply -f group-discount-service-deployment.yaml
+kubectl apply -f loyalty-service-deployment.yaml
+
+
+
+<!-- Ultimas configuraciones -->
+kubectl get pods
+
+minikube service frontend
+minikube tunnel

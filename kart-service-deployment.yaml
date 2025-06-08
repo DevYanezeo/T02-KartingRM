@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kart-service-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kart-service
+  template:
+    metadata:
+      labels:
+        app: kart-service
+    spec:
+      containers:
+        - name: kart-service
+          image: elynnz/kart-service:latest
+          ports:
+            - containerPort: 8082
+          env:
+            - name: DB_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config-map
+                  key: POSTGRES_HOST
+            - name: DB_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config-map
+                  key: POSTGRES_PORT
+            - name: DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config-map
+                  key: KART_DB_NAME
+            - name: DB_USER
+              value: postgres
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+            - name: SERVER_PORT
+              value: "8082"
+            - name: SPRING_PROFILES_ACTIVE
+              value: "kubernetes"
+            - name: SPRING_CONFIG_IMPORT
+              value: "configserver:http://config-service:8081"
+            - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+              value: "http://eureka-server:8761/eureka" 

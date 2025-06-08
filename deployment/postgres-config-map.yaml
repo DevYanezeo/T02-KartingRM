@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config-map
+data:
+  # Configuración común para todos los servicios
+  POSTGRES_HOST: "postgres-service"
+  POSTGRES_PORT: "5432"
+
+  # Bases de datos específicas para cada microservicio
+  BOOKING_DB_NAME: "booking_db"
+  GROUP_DISCOUNT_DB_NAME: "group_discount_db"
+  KART_DB_NAME: "kart_db"
+  LOYALTY_DB_NAME: "loyalty_db"
+  PRICING_DB_NAME: "pricing_db"
+  RACK_DB_NAME: "rack_db"
+  SPECIALDAY_DB_NAME: "specialday_db"

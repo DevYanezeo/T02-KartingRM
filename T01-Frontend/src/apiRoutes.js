@@ -5,6 +5,8 @@ export const ROUTES = {
   BOOKINGS: '/api/bookings',
   CLIENTS: '/api/client',
   INVOICES: '/api/bookings/invoices',
+  INCOME_BY_LAPS: '/api/reports/ingresos-por-vueltas',
+  INCOME_BY_PEOPLE: '/api/reports/ingresos-por-personas',
   // Agrega aquí otros endpoints según los microservicios y rutas de tu gateway
 };
 

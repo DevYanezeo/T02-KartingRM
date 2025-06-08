@@ -1,0 +1,204 @@
+.reportes-page {
+  background-color: var(--bg-light);
+  padding: 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.reportes-header {
+  background-color: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px var(--border-color);
+}
+
+.reportes-header h1 {
+  color: var(--primary);
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.reportes-header h1 svg {
+  color: var(--accent);
+}
+
+.fecha-form {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px var(--border-color);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: flex-end;
+}
+
+.fecha-input-group {
+  flex: 1;
+  min-width: 250px;
+}
+
+.fecha-input-group label {
+  display: block;
+  color: var(--primary);
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.fecha-input-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.fecha-input-group input:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 2px var(--secondary-light);
+}
+
+.consultar-btn {
+  background: var(--secondary);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 150px;
+  justify-content: center;
+}
+
+.consultar-btn:hover {
+  background: var(--secondary-light);
+  transform: translateY(-1px);
+}
+
+.consultar-btn:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error-message {
+  background: #fef2f2;
+  border-left: 4px solid var(--error);
+  color: var(--error);
+  padding: 1rem;
+  border-radius: 0 6px 6px 0;
+  margin: 1rem 0;
+}
+
+.loading-message {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--primary);
+  padding: 1rem;
+  background: var(--bg-light);
+  border-radius: 6px;
+  margin: 1rem 0;
+}
+
+.loading-message svg {
+  animation: spin 1s linear infinite;
+}
+
+.reporte-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px var(--border-color);
+}
+
+.reporte-section h2 {
+  color: var(--primary);
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.reporte-section h2 svg {
+  color: var(--accent);
+}
+
+.reporte-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px var(--border-color);
+}
+
+.reporte-table th {
+  background: var(--primary);
+  color: var(--text-light);
+  font-weight: 500;
+  text-align: left;
+  padding: 1rem;
+  font-size: 0.9rem;
+}
+
+.reporte-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--primary-dark);
+}
+
+.reporte-table tbody tr:hover {
+  background-color: var(--bg-light);
+}
+
+.reporte-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 2rem;
+  color: var(--primary);
+  background: var(--bg-light);
+  border-radius: 8px;
+  font-size: 1.1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .reportes-page {
+    padding: 1rem;
+  }
+  
+  .fecha-form {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .fecha-input-group {
+    width: 100%;
+  }
+  
+  .consultar-btn {
+    width: 100%;
+  }
+} 

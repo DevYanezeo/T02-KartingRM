@@ -320,6 +320,30 @@ public class BookingService {
         return "RES-" + alfanumerico;
     }
 
+    // En BookingService o una clase utilitaria
+    public InvoiceDTO mapToInvoiceDTO(Invoice inv) {
+        List<DetalleParticipanteDTO> detalle = new ArrayList<>();
+        try {
+            if (inv.getDetalleParticipantesJson() != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                detalle = Arrays.asList(mapper.readValue(inv.getDetalleParticipantesJson(), DetalleParticipanteDTO[].class));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new InvoiceDTO(
+            inv.getId(),
+            inv.getInvoiceCode(),
+            inv.getFechaEmision(),
+            inv.getMontoTotalSinIVA(),
+            inv.getIvaTotal(),
+            inv.getMontoTotalConIVA(),
+            inv.getPdfUrl(),
+            inv.getNombreResponsable(),
+            detalle
+        );
+    }
+
     public List<BookingDTO> getAllBookings() {
         List<Booking> bookings = bookingRepository.findAll();
         List<BookingDTO> dtos = new ArrayList<>();
@@ -336,6 +360,10 @@ public class BookingService {
             dto.setParticipantes(participantesDTO);
             // Mapea karts asignados
             dto.setKartsAsignados(booking.getAssignedKarts());
+            // Mapea la factura asociada
+            invoiceRepository.findByBookingId(booking.getId()).ifPresent(invoice -> {
+                dto.setInvoice(mapToInvoiceDTO(invoice));
+            });
             // Otros campos si los necesitas
             dtos.add(dto);
         }

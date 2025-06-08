@@ -30,17 +30,24 @@ public class ReportService {
 
     public List<IngresosPorVueltasDTO> obtenerIngresosPorVueltas(LocalDateTime desde, LocalDateTime hasta) {
         BookingDTO[] bookings = restTemplate.getForObject(bookingServiceUrl, BookingDTO[].class);
-        if (bookings == null) return Collections.emptyList();
-
+        if (bookings == null) {
+            System.out.println("[LOG] No se recibieron bookings del servicio de reservas.");
+            return Collections.emptyList();
+        }
+        System.out.println("[LOG] Bookings recibidos: " + bookings.length);
+        for (BookingDTO b : bookings) {
+            System.out.println("[LOG] Reserva: id=" + b.getId() + ", numVueltas=" + b.getNumVueltas() + ", fechaReserva=" + b.getFechaReserva()
+                + ", invoice=" + (b.getInvoice() != null ? ("fechaEmision=" + b.getInvoice().getFechaEmision() + ", montoTotalConIVA=" + b.getInvoice().getMontoTotalConIVA()) : "null"));
+        }
         // Determinar todos los tipos de vueltas presentes
         Set<Integer> tiposVueltas = Arrays.stream(bookings)
                 .map(BookingDTO::getNumVueltas)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
-
+        System.out.println("[LOG] Tipos de vueltas detectados: " + tiposVueltas);
         // Determinar todos los meses del rango
         List<String> meses = obtenerMesesEnRango(desde, hasta);
-
+        System.out.println("[LOG] Meses en rango: " + meses);
         List<IngresosPorVueltasDTO> resultado = new ArrayList<>();
         for (Integer tipo : tiposVueltas) {
             Map<String, BigDecimal> ingresosPorMes = new LinkedHashMap<>();
@@ -51,6 +58,7 @@ public class ReportService {
                         .filter(b -> mes.equals(formatearMes(b.getInvoice().getFechaEmision())))
                         .map(b -> BigDecimal.valueOf(Optional.ofNullable(b.getInvoice().getMontoTotalConIVA()).orElse(0)))
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
+                System.out.println("[LOG] Tipo: " + tipo + ", Mes: " + mes + ", Total: " + total);
                 ingresosPorMes.put(mes, total);
             }
             resultado.add(new IngresosPorVueltasDTO(tipo + " vueltas", ingresosPorMes));
@@ -60,9 +68,17 @@ public class ReportService {
 
     public List<IngresosPorPersonasDTO> obtenerIngresosPorPersonas(LocalDateTime desde, LocalDateTime hasta) {
         BookingDTO[] bookings = restTemplate.getForObject(bookingServiceUrl, BookingDTO[].class);
-        if (bookings == null) return Collections.emptyList();
-
+        if (bookings == null) {
+            System.out.println("[LOG] No se recibieron bookings del servicio de reservas.");
+            return Collections.emptyList();
+        }
+        System.out.println("[LOG] Bookings recibidos: " + bookings.length);
+        for (BookingDTO b : bookings) {
+            System.out.println("[LOG] Reserva: id=" + b.getId() + ", participantes=" + (b.getParticipantes() != null ? b.getParticipantes().size() : "null")
+                + ", invoice=" + (b.getInvoice() != null ? ("fechaEmision=" + b.getInvoice().getFechaEmision() + ", montoTotalConIVA=" + b.getInvoice().getMontoTotalConIVA()) : "null"));
+        }
         List<String> meses = obtenerMesesEnRango(desde, hasta);
+        System.out.println("[LOG] Meses en rango: " + meses);
         List<IngresosPorPersonasDTO> resultado = new ArrayList<>();
         for (int i = 0; i < RANGOS_PERSONAS.size(); i++) {
             int[] rango = RANGOS_PERSONAS.get(i);
@@ -79,6 +95,7 @@ public class ReportService {
                         .filter(b -> mes.equals(formatearMes(b.getInvoice().getFechaEmision())))
                         .map(b -> BigDecimal.valueOf(Optional.ofNullable(b.getInvoice().getMontoTotalConIVA()).orElse(0)))
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
+                System.out.println("[LOG] Rango: " + nombreRango + ", Mes: " + mes + ", Total: " + total);
                 ingresosPorMes.put(mes, total);
             }
             resultado.add(new IngresosPorPersonasDTO(nombreRango, ingresosPorMes));

@@ -6,7 +6,7 @@ import Tarifas from './views/Tarifas';
 import CalendarView from './views/CalendarView';
 import Reservas from './views/Reservas';
 import Invoice from './views/Invoice';
-
+import Reportes from './views/Reportes';
 
 import './App.css';  
 
@@ -23,6 +23,7 @@ function App() {
             <Route path="/calendar" element={<CalendarView />} />
             <Route path="/reservas" element={<Reservas />} />
             <Route path="/invoice" element={<Invoice />} />
+            <Route path="/reportes" element={<Reportes />} />
           </Routes>
         </main>
         

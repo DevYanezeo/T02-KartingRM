@@ -5,7 +5,7 @@ spring:
   application:
     name: eureka-service
   config:
-    import: optional:configserver:http://localhost:8081  # Forma recomendada en Spring Boot 2.4+
+    import: optional:configserver:http://config-service:8081 # Forma recomendada en Spring Boot 2.4+
 
 eureka:
   dashboard:

@@ -5,8 +5,7 @@ import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
 import './home.css';
 import { ROUTES } from '../apiRoutes';
-
-const API_BASE = window.API_URL || 'http://localhost:8080';
+import { getApiBase } from '../getApiBase';
 
 const Home = () => {
   const [recentReservations, setRecentReservations] = useState([]);
@@ -16,7 +15,7 @@ const Home = () => {
   const fetchReservations = async () => {
     try {
       setLoadingReservations(true);
-      const response = await axios.get(`${API_BASE}${ROUTES.BOOKINGS}`);
+      const response = await axios.get(`${getApiBase()}${ROUTES.BOOKINGS}`);
       // Mapeamos los datos del backend al formato que necesita el frontend
       const formattedReservations = response.data.map(reservation => ({
         id: reservation.id,

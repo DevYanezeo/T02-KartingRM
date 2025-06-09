@@ -4,8 +4,8 @@ import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
 import { FaCalendarAlt, FaChevronLeft, FaChevronRight, FaClock } from 'react-icons/fa';
 import '../components/calendar/calendar.css';
+import { getApiBase } from '../getApiBase';
 
-const API_BASE = window.API_URL || 'http://localhost:8080';
 const HOURS = Array.from({ length: 13 }, (_, i) => 10 + i); // 10 a 22
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 const MINUTES_PER_SLOT = 15;
@@ -76,7 +76,7 @@ const CalendarView = () => {
     setLoading(true);
     try {
       const promises = dates.map(date =>
-        axios.get(`${API_BASE}/api/rack/by-date?date=${date}`)
+        axios.get(`${getApiBase()}/api/rack/by-date?date=${date}`)
       );
       const responses = await Promise.all(promises);
       const newData = {};

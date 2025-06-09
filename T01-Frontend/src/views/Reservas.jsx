@@ -5,8 +5,8 @@ import Footer from '../components/common/Footer';
 import { FaUserPlus, FaTrash, FaCalendarAlt, FaClock, FaCheck } from 'react-icons/fa';
 import './Reservas.css';
 import { ROUTES } from '../apiRoutes';
+import { getApiBase } from '../getApiBase';
 
-const API_BASE = window.API_URL || 'http://localhost:8080';
 const Reservas = () => {
   const [fechaUso, setFechaUso] = useState('');
   const [horaUso, setHoraUso] = useState('');
@@ -54,7 +54,7 @@ const Reservas = () => {
       participantes
     };
     try {
-      await axios.post(`${API_BASE}${ROUTES.BOOKINGS}`, reserva);
+      await axios.post(`${getApiBase()}${ROUTES.BOOKINGS}`, reserva);
       setSuccess('¡Reserva creada exitosamente!');
       setFechaUso('');
       setHoraUso('');

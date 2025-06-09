@@ -6,8 +6,8 @@ import Footer from '../components/common/Footer';
 import { FaFileInvoice, FaSearch, FaFileDownload, FaSync, FaCalendarAlt } from 'react-icons/fa';
 import './Invoice.css';
 import { ROUTES, getInvoiceDownloadUrl } from '../apiRoutes';
+import { getApiBase } from '../getApiBase';
 
-const API_BASE = window.API_URL || 'http://localhost:8080';
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,7 +20,7 @@ const Invoices = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_BASE}${ROUTES.INVOICES}`);
+      const response = await axios.get(`${getApiBase()}${ROUTES.INVOICES}`);
       if (!response.data) throw new Error("No se recibieron datos");
       // Validar que la respuesta sea un array
       const invoicesData = Array.isArray(response.data) ? response.data : [];

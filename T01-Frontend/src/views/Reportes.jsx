@@ -5,8 +5,8 @@ import Footer from '../components/common/Footer';
 import { ROUTES } from '../apiRoutes';
 import { FaChartBar, FaCalendarAlt, FaSearch, FaSpinner, FaUsers, FaRoute } from 'react-icons/fa';
 import './Reportes.css';
+import { getApiBase } from '../getApiBase';
 
-const API_BASE = window.API_URL || 'http://localhost:8080';
 const Reportes = () => {
   const [desde, setDesde] = useState('2024-01-01T00:00:00');
   const [hasta, setHasta] = useState('2024-12-31T23:59:59');
@@ -20,8 +20,8 @@ const Reportes = () => {
     setError(null);
     try {
       const [vueltasRes, personasRes] = await Promise.all([
-        axios.get(`${API_BASE}${ROUTES.INCOME_BY_LAPS}?desde=${desde}&hasta=${hasta}`),
-        axios.get(`${API_BASE}${ROUTES.INCOME_BY_PEOPLE}?desde=${desde}&hasta=${hasta}`)
+        axios.get(`${getApiBase()}${ROUTES.INCOME_BY_LAPS}?desde=${desde}&hasta=${hasta}`),
+        axios.get(`${getApiBase()}${ROUTES.INCOME_BY_PEOPLE}?desde=${desde}&hasta=${hasta}`)
       ]);
       setIngresosPorVueltas(vueltasRes.data);
       setIngresosPorPersonas(personasRes.data);

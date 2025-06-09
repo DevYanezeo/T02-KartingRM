@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { getApiBase } from '../getApiBase';
 import './CreateBookingButton';
 
 const CreateBookingButton = ({ onBookingCreated }) => {
@@ -15,14 +16,6 @@ const CreateBookingButton = ({ onBookingCreated }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
-
-  const API_BASE = window.API_URL || 'http://localhost:8080';
-  const api = axios.create({
-    baseURL: API_BASE,
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -53,6 +46,14 @@ const CreateBookingButton = ({ onBookingCreated }) => {
         karts: parseInt(formData.karts),
         pricingOption: formData.pricingOption
       };
+
+      // Crear instancia de axios con la baseURL correcta
+      const api = axios.create({
+        baseURL: getApiBase(),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
 
       // Enviar al backend
       const response = await api.post('/bookings', bookingRequest);

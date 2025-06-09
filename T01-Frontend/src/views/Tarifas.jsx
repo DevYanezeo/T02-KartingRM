@@ -5,8 +5,8 @@ import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
 import './Tarifas.css';
 import { ROUTES } from '../apiRoutes';
+import { getApiBase } from '../getApiBase';
 
-const API_BASE = window.API_URL || 'http://localhost:8080';
 const Tarifas = () => {
   // Estados para tarifas
   const [pricings, setPricings] = useState([]);
@@ -27,7 +27,7 @@ const Tarifas = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`${API_BASE}${ROUTES.PRICING}`);
+      const response = await axios.get(`${getApiBase()}${ROUTES.PRICING}`);
       setPricings(response.data);
     } catch (error) {
       setError('Error al cargar las tarifas');
@@ -39,7 +39,7 @@ const Tarifas = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${API_BASE}${ROUTES.PRICING}`);
+        const response = await axios.get(`${getApiBase()}${ROUTES.PRICING}`);
         setPricings(response.data);
       } catch (error) {
         setError('Error al cargar las tarifas');
@@ -62,7 +62,7 @@ const Tarifas = () => {
   const handleAddPricing = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${API_BASE}${ROUTES.PRICING}`, newPricing);
+      const response = await axios.post(`${getApiBase()}${ROUTES.PRICING}`, newPricing);
       setPricings([...pricings, response.data]);
       setNewPricing({ laps: '', basePrice: '', totalDuration: '' });
       setSuccessMessage('Tarifa agregada correctamente');
@@ -84,7 +84,7 @@ const Tarifas = () => {
   const handleUpdatePricing = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.put(`${API_BASE}${ROUTES.PRICING}/${editingPricingId}`, newPricing);
+      const response = await axios.put(`${getApiBase()}${ROUTES.PRICING}/${editingPricingId}`, newPricing);
       setPricings(pricings.map(p => p.id === editingPricingId ? response.data : p));
       setEditingPricingId(null);
       setNewPricing({ laps: '', basePrice: '', totalDuration: '' });
@@ -98,7 +98,7 @@ const Tarifas = () => {
   const handleDeletePricing = async (id) => {
     if (window.confirm('¿Estás seguro de eliminar esta tarifa?')) {
       try {
-        await axios.delete(`${API_BASE}${ROUTES.PRICING}/${id}`);
+        await axios.delete(`${getApiBase()}${ROUTES.PRICING}/${id}`);
         setPricings(pricings.filter(p => p.id !== id));
         setSuccessMessage('Tarifa eliminada correctamente');
         setTimeout(() => setSuccessMessage(null), 3000);
